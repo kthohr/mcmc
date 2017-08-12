@@ -1,0 +1,92 @@
+#!/bin/bash
+## MCMC tests config script
+
+while getopts b:c option
+do
+    case "${option}"
+    in
+    b) MCMC_BUILD=${OPTARG};;
+    c) MCMC_COVERAGE="y";;
+    esac
+done
+
+if [ -z ${CC+x} ]; then 
+    CC=gcc
+fi
+if [ -z ${CXX+x} ]; then 
+    CXX=g++
+fi
+if [ -z ${FC+x} ]; then 
+    FC=gfortran
+fi
+
+if [[ !(-z ${KEITH_DEV_SETTINGS+x}) ]]; then
+    CC=gcc-mp-7
+    CXX=g++-mp-7
+    FC=gfortran-mp-7
+fi
+
+WDIR=${PWD}
+
+if [ -z ${ARMA_INCLUDE_PATH+x} ]; then 
+    echo "MCMC: ARMA_INCLUDE_PATH not set"
+    if [ -f /usr/include/armadillo ]; then
+        ARMA_INCLUDE_PATH="/usr/include"
+    elif [ -f /usr/local/include/armadillo ]; then
+        ARMA_INCLUDE_PATH="/usr/local/include"
+    elif [ -f /opt/include/armadillo ]; then
+        ARMA_INCLUDE_PATH="/opt/include"
+    elif [ -f /opt/local/include/armadillo ]; then
+        ARMA_INCLUDE_PATH="/opt/local/include"
+    else 
+        echo "MCMC tests: cannot find the armadillo library."
+        echo ""
+        exit 1
+    fi
+fi
+
+echo "MCMC tests: ARMA_INCLUDE_PATH set to ${ARMA_INCLUDE_PATH}"
+
+# coverage build? used for codecov
+
+if [[ "${MCMC_COVERAGE}" == "y" ]]; then 
+    echo "MCMC tests: coverage build"
+    MCMC_OPT_FLAGS="-g -O0 -Wall --coverage -fno-inline -fno-inline-small-functions -fno-default-inline"
+else
+    MCMC_OPT_FLAGS="-O3 -Wall"
+fi
+
+MCMC_SHLIB_NAME="mcmc"
+
+# dev build
+
+if [[ "${MCMC_BUILD}" == "dev" ]]; then
+    echo "MCMC: dev version"
+    cd ..
+    MCMC_INCLUDE_PATH=${PWD}/include
+    MCMC_INSTALL_PATH=${PWD}
+    cd ${WDIR}
+else
+    MCMC_INSTALL_PATH="/usr/local"
+fi
+
+# BLAS and LAPACK settings
+
+if [[ $OSTYPE == darwin* ]] ; then
+        MCMC_BLAS_LAPACK="-framework Accelerate"
+elif [[ $OSTYPE == *linux* ]] ; then
+    MCMC_BLAS_LAPACK="-lblas -llapack"
+else
+    MCMC_BLAS_LAPACK="-lblas -llapack"
+fi
+
+sed -e "s|@CC@|${CC}|" \
+    -e "s|@CXX@|${CXX}|" \
+    -e "s|@FC@|${FC}|" \
+    -e "s|@ARMA_INCLUDE_PATH@|${ARMA_INCLUDE_PATH}|" \
+    -e "s|@MCMC_BLAS_LAPACK@|${MCMC_BLAS_LAPACK}|" \
+    -e "s|@MCMC_OPT_FLAGS@|${MCMC_OPT_FLAGS}|" \
+    -e "s|@MCMC_SHLIB_NAME@|${MCMC_SHLIB_NAME}|" \
+    -e "s|@MCMC_INCLUDE_PATH@|${MCMC_INCLUDE_PATH}|" \
+    -e "s|@MCMC_INSTALL_PATH@|${MCMC_INSTALL_PATH}|" \
+    Makefile.in > Makefile

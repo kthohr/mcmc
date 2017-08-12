@@ -11,12 +11,12 @@ install:
 script:
   - ./configure -b dev -c
   - make
-  # - cd ./tests
-  # - ./cov_setup
-  # - cd ..
+  - cd ./tests
+  - ./cov_setup
+  - cd ..
 
-# after_success:
-#   - bash <(curl -s https://codecov.io/bash)
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
 
 after_failure:
   - ./travis-tool.sh dump_logs
