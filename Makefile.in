@@ -1,0 +1,61 @@
+
+# core compiling options
+CC  = @CC@
+CXX = @CXX@
+FC  = @FC@
+
+CXX_STD = -std=c++11
+OPT_FLAGS = @MCMC_OPT_FLAGS@
+
+ARMA_INCLUDE_PATH = @ARMA_INCLUDE_PATH@
+
+# install location
+INSTALL_PATH=@MCMC_INSTALL_PATH@
+
+# source directories
+SDIR = .
+MCMC_DIR = $(SDIR)
+MCMC_SRC_DIR = $(SDIR)/src
+MCMC_HEADER_DIR = $(SDIR)/include
+MCMC_TEST_DIR = $(SDIR)/tests
+
+# shared library name and flags
+SHLIB = @MCMC_SHLIB_NAME@
+SHLIB_FLAGS = $(CXX_STD) @MCMC_SHLIB_FLAGS@
+
+# general flags
+CFLAGS = -Wall $(OPT_FLAGS) -I$(MCMC_HEADER_DIR)
+CXXFLAGS = $(CXX_STD) -Wall $(OPT_FLAGS) -I$(ARMA_INCLUDE_PATH) -I$(MCMC_HEADER_DIR)
+FFLAGS = $(OPT_FLAGS)
+LIBS= @MCMC_BLAS_LAPACK@
+
+# core MCMC files
+
+SOURCES_MCMC= $(MCMC_SRC_DIR)/de.cpp $(MCMC_SRC_DIR)/rwmh.cpp
+OBJECTS_MCMC= $(SOURCES_MCMC:.cpp=.o)
+
+all: $(MCMC_DIR)/$(SHLIB) $(OBJECTS_MCMC)
+
+# core MCMC files
+$(MCMC_SRC_DIR)/%.o: $(MCMC_SRC_DIR)/%.cpp
+	$(CXX) $(CXXFLAGS) $< -c -o $@
+
+# shared library
+$(MCMC_DIR)/$(SHLIB): $(OBJECTS_MCMC)
+	$(CXX) $(SHLIB_FLAGS) -o $@ $^ $(LIBS)
+
+# cleanup and install
+.PHONY: clean
+clean:
+	@rm -f *.so ./tests/*.test ./tests/*.o $(MCMC_SRC_DIR)/*.o $(MCMC_SRC_DIR)/*.gcov $(MCMC_SRC_DIR)/*.gcno $(MCMC_SRC_DIR)/*.gcda $(MCMC_SRC_DIR)/*.dSYM $(MCMC_SRC_DIR)/*/*.o $(MCMC_SRC_DIR)/*/*.gcov $(MCMC_SRC_DIR)/*/*.gcno $(MCMC_SRC_DIR)/*/*.gcda $(MCMC_SRC_DIR)/*/*.dSYM
+
+.PHONY: vclean
+vclean:
+	@rm -f *.so ./tests/*.test ./tests/*.o $(MCMC_SRC_DIR)/*.o $(MCMC_SRC_DIR)/*/*.o
+	@rm -rf ./include/armadillo*
+
+.PHONY: install
+install: $(SHLIB)
+	@cp $(MCMC_DIR)/$(SHLIB) $(INSTALL_PATH)/lib/$(SHLIB)
+	@mkdir -p $(INSTALL_PATH)/include/mcmc
+	@cp -r $(MCMC_DIR)/include/* $(INSTALL_PATH)/include/mcmc

@@ -1,0 +1,27 @@
+
+langauge: cpp
+compiler: gcc
+sudo: required
+dist: trusty
+
+install:
+    - sudo apt-get update
+    - sudo apt-get install gfortran libblas-dev liblapack-dev
+
+script:
+  - ./configure -b dev -c
+  - make
+  # - cd ./tests
+  # - ./cov_setup
+  # - cd ..
+
+# after_success:
+#   - bash <(curl -s https://codecov.io/bash)
+
+after_failure:
+  - ./travis-tool.sh dump_logs
+
+notifications:
+  email:
+    on_success: change
+    on_failure: change
