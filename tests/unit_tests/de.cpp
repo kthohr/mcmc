@@ -92,10 +92,6 @@ int main()
 
     arma::cube draws_out;
     mcmc::de(initial_val,draws_out,log_target_dens,&dta);
-
-    arma::cout << "draws:\n" << draws_out.slice(100).rows(0,9) << arma::endl;
-
-    std::cout << "acceptance rate = " << settings.de_accept_rate << arma::endl;
     
     //
     //
@@ -125,7 +121,7 @@ int main()
 
     ub(0) = arma::datum::inf;
     settings.upper_bounds = ub;
-    
+
     mcmc::de(initial_val,draws_out,log_target_dens,&dta,settings);
 
     return 0;
