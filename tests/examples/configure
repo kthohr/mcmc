@@ -62,7 +62,7 @@ MCMC_SHLIB_NAME="mcmc"
 
 if [[ "${MCMC_BUILD}" == "dev" ]]; then
     echo "MCMC: dev version"
-    cd ..
+    cd ../..
     MCMC_INCLUDE_PATH=${PWD}/include
     MCMC_INSTALL_PATH=${PWD}
     cd ${WDIR}

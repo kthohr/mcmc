@@ -47,9 +47,7 @@ determine_bounds_type(const bool vals_bound, const int n_vals, const arma::vec& 
             } else if ( !std::isfinite(lower_bounds(i)) && std::isfinite(upper_bounds(i)) ) {
                 // upper bound only
                 ret_vec(i) = 3;
-            } else {
-                printf("determine_bounds_type: unknown error\n");
-            }
+            } // if both are infinite, this is covered by the base case
         }
     }
     //

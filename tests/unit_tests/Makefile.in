@@ -1,0 +1,38 @@
+
+# core compiling options
+CC  = @CC@
+CXX = @CXX@
+FC  = @FC@
+
+CXX_STD = -std=c++11
+OPT_FLAGS = @MCMC_OPT_FLAGS@
+
+ARMA_INCLUDE_PATH = @ARMA_INCLUDE_PATH@
+
+# install location
+INSTALL_PATH=@MCMC_INSTALL_PATH@
+
+# source directories
+SDIR = ./..
+MCMC_DIR = $(SDIR)
+MCMC_HEADER_DIR = @MCMC_INCLUDE_PATH@
+MCMC_TEST_DIR = .
+
+# general flags
+CXXFLAGS = $(CXX_STD) -Wall $(OPT_FLAGS) -I$(ARMA_INCLUDE_PATH) -I$(MCMC_HEADER_DIR)
+LIBS= -L@MCMC_INSTALL_PATH@ -l@MCMC_SHLIB_NAME@ @MCMC_BLAS_LAPACK@
+
+# TraME Test Files
+SOURCES_MCMC= $(MCMC_TEST_DIR)/determine_bounds_type.cpp $(MCMC_TEST_DIR)/log_jacobian.cpp $(MCMC_TEST_DIR)/rwmh.cpp $(MCMC_TEST_DIR)/transform_vals.cpp
+OBJECTS_MCMC= $(SOURCES_MCMC:.cpp=.test)
+
+all: $(OBJECTS_MCMC)
+
+# core TraME files
+$(MCMC_TEST_DIR)/%.test: $(MCMC_TEST_DIR)/%.cpp
+	$(CXX) $(CXXFLAGS) $< -o $@ $(LIBS)
+
+# cleanup and install
+.PHONY: clean
+clean:
+	@rm -rf *.so ./*.gcov ./*.gcno ./*.gcda ./*.dSYM ./*.test
