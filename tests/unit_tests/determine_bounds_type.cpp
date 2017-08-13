@@ -45,7 +45,7 @@ int main()
     ub(2) = 2;
     ub(4) = arma::datum::inf;
 
-    arma::uvec bounds_type = determine_bounds_type(vals_bound,n_vals,lb,ub);
+    arma::uvec bounds_type = mcmc::determine_bounds_type(vals_bound,n_vals,lb,ub);
 
     return 0;
 }

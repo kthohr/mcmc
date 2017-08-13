@@ -51,7 +51,7 @@ int main()
 
     arma::vec vals_trans = mcmc::transform(initial_vals,bounds_type,lb,ub);
 
-    double lj_val = log_jacobian(vals_trans,bounds_type,lb,ub);
+    double lj_val = mcmc::log_jacobian(vals_trans,bounds_type,lb,ub);
 
     return 0;
 }
