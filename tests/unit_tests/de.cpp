@@ -26,7 +26,7 @@
  * 08/12/2017
  */
 
-// g++-mp-7 -std=c++11 -Wall -O3 -I/opt/local/include -I./../include rwmh_normal.cpp -o rwmh_normal.test -L./../ -lmcmc -framework Accelerate
+// g++-mp-7 -std=c++11 -Wall -O3 -I/opt/local/include -I./../include de_normal.cpp -o de_normal.test -L./../ -lmcmc -framework Accelerate
 
 #include "mcmc.hpp"
 
@@ -85,12 +85,18 @@ int main()
     arma::vec x_dta = mu + arma::randn(n_data,1);
     dta.x = x_dta;
 
+    //
+
     arma::vec initial_val(1);
     initial_val(0) = 1.0;
 
-    arma::mat draws_out;
-    mcmc::rwmh(initial_val,draws_out,log_target_dens,&dta);
+    arma::cube draws_out;
+    mcmc::de(initial_val,draws_out,log_target_dens,&dta);
 
+    arma::cout << "draws:\n" << draws_out.slice(100).rows(0,9) << arma::endl;
+
+    std::cout << "acceptance rate = " << settings.de_accept_rate << arma::endl;
+    
     //
     //
 
@@ -106,21 +112,21 @@ int main()
     settings.lower_bounds = lb;
     settings.upper_bounds = ub;
 
-    mcmc::rwmh(initial_val,draws_out,log_target_dens,&dta,settings);
+    mcmc::de(initial_val,draws_out,log_target_dens,&dta,settings);
 
     //
 
     lb(0) = -arma::datum::inf;
     settings.lower_bounds = lb;
 
-    mcmc::rwmh(initial_val,draws_out,log_target_dens,&dta,settings);
+    mcmc::de(initial_val,draws_out,log_target_dens,&dta,settings);
 
     //
 
     ub(0) = arma::datum::inf;
     settings.upper_bounds = ub;
     
-    mcmc::rwmh(initial_val,draws_out,log_target_dens,&dta,settings);
+    mcmc::de(initial_val,draws_out,log_target_dens,&dta,settings);
 
     return 0;
 }
