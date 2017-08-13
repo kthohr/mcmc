@@ -26,7 +26,7 @@
  * 08/12/2017
  */
 
-// note: std::isfinite is not true for: NaN, - Inf, or + Inf
+// note: std::isfinite is not true for: NaN, -Inf, or +Inf
 
 inline
 arma::uvec
