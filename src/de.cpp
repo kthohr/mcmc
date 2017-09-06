@@ -55,8 +55,8 @@ mcmc::de_int(const arma::vec& initial_vals, arma::cube& draws_out, std::function
     const double par_gamma = 2.38 / std::sqrt(2.0*n_vals);
     const double par_gamma_jump = settings.de_par_gamma_jump;
 
-    const arma::vec par_initial_lb = ((int) settings.de_initial_lb.n_elem == n_vals) ? settings.de_initial_lb : arma::zeros(n_vals,1) - 0.5;
-    const arma::vec par_initial_ub = ((int) settings.de_initial_ub.n_elem == n_vals) ? settings.de_initial_ub : arma::zeros(n_vals,1) + 0.5;
+    const arma::vec par_initial_lb = ((int) settings.de_initial_lb.n_elem == n_vals) ? settings.de_initial_lb : initial_vals - 0.5;
+    const arma::vec par_initial_ub = ((int) settings.de_initial_ub.n_elem == n_vals) ? settings.de_initial_ub : initial_vals + 0.5;
 
     const bool vals_bound = settings.vals_bound;
 
@@ -86,7 +86,7 @@ mcmc::de_int(const arma::vec& initial_vals, arma::cube& draws_out, std::function
     #pragma omp parallel for
 #endif
     for (int i=0; i < n_pop; i++) {
-        X.row(i) = initial_vals.t() + par_initial_lb.t() + (par_initial_ub.t() - par_initial_lb.t())%arma::randu(1,n_vals);
+        X.row(i) = par_initial_lb.t() + (par_initial_ub.t() - par_initial_lb.t())%arma::randu(1,n_vals);
 
         double prop_kernel_val = box_log_kernel(X.row(i).t(),target_data);
 
