@@ -90,7 +90,7 @@ mcmc::rwmh_int(const arma::vec& initial_vals, arma::mat& draws_out, std::functio
     arma::vec new_draw  = first_draw;
     
     arma::mat cov_mcmc_sc   = par_scale * par_scale * cov_mcmc;
-    arma::mat cov_mcmc_chol = arma::trans(arma::chol(cov_mcmc_sc));
+    arma::mat cov_mcmc_chol = arma::chol(cov_mcmc_sc,"lower");
     //
     int n_accept = 0;    
     double comp_val, rand_val;

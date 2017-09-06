@@ -19,10 +19,14 @@
 #ifndef MCMC_INCLUDES
 #define MCMC_INCLUDES
 
-#ifndef ARMA_DONT_USE_WRAPPER
-    #define ARMA_DONT_USE_WRAPPER
+#ifdef USE_RCPP_ARMADILLO
+    #include <RcppArmadillo.h>
+#else
+    #ifndef ARMA_DONT_USE_WRAPPER
+        #define ARMA_DONT_USE_WRAPPER
+    #endif
+    #include "armadillo"
 #endif
-#include "armadillo"
 
 #include "mcmc_options.hpp"
 
