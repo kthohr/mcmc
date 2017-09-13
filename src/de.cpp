@@ -82,7 +82,7 @@ mcmc::de_int(const arma::vec& initial_vals, arma::cube& draws_out, std::function
     arma::vec target_vals(n_pop);
     arma::mat X(n_pop,n_vals);
 
-#ifdef MCMC_OMP
+#ifdef MCMC_USE_OMP
     #pragma omp parallel for
 #endif
     for (int i=0; i < n_pop; i++) {
@@ -112,7 +112,7 @@ mcmc::de_int(const arma::vec& initial_vals, arma::cube& draws_out, std::function
             par_gamma_run = par_gamma_jump;
         }
 
-#ifdef MCMC_OMP
+#ifdef MCMC_USE_OMP
         #pragma omp parallel for
 #endif
             for (int i=0; i < n_pop; i++) {
@@ -162,7 +162,7 @@ mcmc::de_int(const arma::vec& initial_vals, arma::cube& draws_out, std::function
     }
 	//
 	if (vals_bound) {
-#ifdef MCMC_OMP
+#ifdef MCMC_USE_OMP
         #pragma omp parallel for
 #endif
         for (int ii = 0; ii < n_gen; ii++) {
