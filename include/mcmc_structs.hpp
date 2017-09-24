@@ -42,9 +42,17 @@ struct mcmc_settings {
 
     double de_accept_rate; // will be returned by the function
 
+    // MALA
+    int mala_n_draws = 1E04;
+    int mala_n_burnin = 1E04;
+
+    double mala_step_size = 1.0;
+
+    double mala_accept_rate; // will be returned by the function
+
     // RWMH
-    int rwmh_n_draws_keep = 1E04;
-    int rwmh_n_draws_burnin = 1E04;
+    int rwmh_n_draws = 1E04;
+    int rwmh_n_burnin = 1E04;
 
     double rwmh_par_scale = 1.0;
     arma::mat rwmh_cov_mat;

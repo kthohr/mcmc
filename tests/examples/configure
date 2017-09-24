@@ -29,8 +29,10 @@ fi
 WDIR=${PWD}
 
 if [ -z ${ARMA_INCLUDE_PATH+x} ]; then 
-    echo "MCMC: ARMA_INCLUDE_PATH not set"
-    if [ -f /usr/include/armadillo ]; then
+    echo ""
+    if [ -f ./../../include/armadillo ]; then 
+        ARMA_INCLUDE_PATH="./../..include"
+    elif [ -f /usr/include/armadillo ]; then
         ARMA_INCLUDE_PATH="/usr/include"
     elif [ -f /usr/local/include/armadillo ]; then
         ARMA_INCLUDE_PATH="/usr/local/include"

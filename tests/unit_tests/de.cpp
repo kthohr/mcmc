@@ -17,16 +17,8 @@
   ################################################################################*/
  
 /*
- * simple normal model
- *
- * Keith O'Hara
- * 08/12/2017
- *
- * This version:
- * 08/12/2017
+ * DE with simple normal model
  */
-
-// g++-mp-7 -std=c++11 -Wall -O3 -I/opt/local/include -I./../include de_normal.cpp -o de_normal.test -L./../ -lmcmc -framework Accelerate
 
 #include "mcmc.hpp"
 
@@ -47,7 +39,13 @@ double ll_dens(const arma::vec& vals_inp, void* ll_data)
     const double sigma = dta->sigma;
     const arma::vec x = dta->x;
 
-    const double ret = - 0.5*std::log(2*pi) - std::log(sigma) - arma::accu( arma::pow(x - mu,2) / (2*sigma*sigma) );
+    const int n_vals = x.n_rows;
+    
+    //
+
+    const double ret = - ((double) n_vals) * (0.5*std::log(2*pi) + std::log(sigma)) - arma::accu( arma::pow(x - mu,2) / (2*sigma*sigma) );
+
+    //
 
     return ret;
 }

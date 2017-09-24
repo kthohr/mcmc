@@ -18,12 +18,6 @@
  
 /*
  * Differential Evolution (DE) MCMC
- *
- * Keith O'Hara
- * 03/01/2016
- *
- * This version:
- * 08/12/2017
  */
 
 #ifndef _mcmc_de_HPP
@@ -35,7 +29,7 @@ bool de(const arma::vec& initial_vals, arma::cube& draws_out, std::function<doub
 bool de(const arma::vec& initial_vals, arma::cube& draws_out, std::function<double (const arma::vec& vals_inp, void* target_data)> target_log_kernel, void* target_data, mcmc_settings& settings);
 
 inline
-double 
+double
 de_cooling_schedule(const int s, const int N_gen)
 {
     return 1.0;

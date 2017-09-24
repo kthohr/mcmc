@@ -18,12 +18,6 @@
  
 /*
  * Random Walk Metropolis-Hastings (RWMH) MCMC
- *
- * Keith O'Hara
- * 05/01/2012
- *
- * This version:
- * 08/12/2017
  */
 
 #ifndef _mcmc_rwmh_HPP

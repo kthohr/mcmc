@@ -18,12 +18,6 @@
  
 /*
  * Differential Evolution (DE) MCMC
- *
- * Keith O'Hara
- * 03/01/2016
- *
- * This version:
- * 08/12/2017
  */
 
 #include "mcmc.hpp"
@@ -140,7 +134,9 @@ mcmc::de_int(const arma::vec& initial_vals, arma::cube& draws_out, std::function
                 }
                 
                 double comp_val = prop_kernel_val - target_vals(i);
+
                 //
+
                 if (comp_val > temperature_j * std::log(arma::as_scalar(arma::randu(1)))) {
                     X.row(i) = X_prop;
                     
@@ -160,7 +156,11 @@ mcmc::de_int(const arma::vec& initial_vals, arma::cube& draws_out, std::function
             par_gamma_run = par_gamma;
         }
     }
-	//
+
+    success = true;
+
+    //
+    
 	if (vals_bound) {
 #ifdef MCMC_USE_OMP
         #pragma omp parallel for
@@ -171,12 +171,13 @@ mcmc::de_int(const arma::vec& initial_vals, arma::cube& draws_out, std::function
             }
         }
 	}
-	//
+	
     if (settings_inp) {
 	    settings_inp->de_accept_rate = (double) n_accept / (double) (n_pop*n_gen);
     }
-	//
-    success = true;
+
+    //
+    
 	return success;
 }
 

@@ -23,7 +23,7 @@ CXXFLAGS = $(CXX_STD) -Wall $(OPT_FLAGS) -I$(ARMA_INCLUDE_PATH) -I$(MCMC_HEADER_
 LIBS= -L@MCMC_INSTALL_PATH@ -l@MCMC_SHLIB_NAME@ @MCMC_BLAS_LAPACK@
 
 # TraME Test Files
-SOURCES_MCMC= $(MCMC_TEST_DIR)/de_normal.cpp $(MCMC_TEST_DIR)/rwmh_normal.cpp
+SOURCES_MCMC= $(MCMC_TEST_DIR)/de_normal.cpp $(MCMC_TEST_DIR)/mala_normal.cpp $(MCMC_TEST_DIR)/rwmh_normal.cpp
 OBJECTS_MCMC= $(SOURCES_MCMC:.cpp=.test)
 
 all: $(OBJECTS_MCMC)

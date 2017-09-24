@@ -17,13 +17,13 @@
   ################################################################################*/
  
 /*
- * Random Walk Metropolis-Hastings (RWMH) MCMC
+ * Metropolis-adjusted Langevin algorithm
  */
 
 #include "mcmc.hpp" 
 
 bool
-mcmc::rwmh_int(const arma::vec& initial_vals, arma::mat& draws_out, std::function<double (const arma::vec& vals_inp, void* target_data)> target_log_kernel, void* target_data, mcmc_settings* settings_inp)
+mcmc::mala_int(const arma::vec& initial_vals, arma::mat& draws_out, std::function<double (const arma::vec& vals_inp, arma::vec* grad_out, void* target_data)> target_log_kernel, void* target_data, mcmc_settings* settings_inp)
 {
     bool success = false;
 
@@ -31,7 +31,7 @@ mcmc::rwmh_int(const arma::vec& initial_vals, arma::mat& draws_out, std::functio
     const int n_vals = initial_vals.n_elem;
 
     //
-    // RWMH settings
+    // MALA settings
 
     mcmc_settings settings;
 
@@ -39,12 +39,10 @@ mcmc::rwmh_int(const arma::vec& initial_vals, arma::mat& draws_out, std::functio
         settings = *settings_inp;
     }
 
-    const int n_draws_keep   = settings.rwmh_n_draws;
-    const int n_draws_burnin = settings.rwmh_n_burnin;
+    const int n_draws_keep   = settings.mala_n_draws;
+    const int n_draws_burnin = settings.mala_n_burnin;
 
-    const double par_scale = settings.rwmh_par_scale;
-
-    const arma::mat cov_mcmc = (settings.rwmh_cov_mat.n_elem == n_vals*n_vals) ? settings.rwmh_cov_mat : arma::eye(n_vals,n_vals);
+    const double step_size = settings.mala_step_size;
 
     const bool vals_bound = settings.vals_bound;
     
@@ -55,14 +53,47 @@ mcmc::rwmh_int(const arma::vec& initial_vals, arma::mat& draws_out, std::functio
 
     // lambda function for box constraints
 
-    std::function<double (const arma::vec& vals_inp, void* box_data)> box_log_kernel = [target_log_kernel, vals_bound, bounds_type, lower_bounds, upper_bounds] (const arma::vec& vals_inp, void* target_data) -> double {
+    std::function<double (const arma::vec& vals_inp, arma::vec* grad_out, void* box_data)> box_log_kernel = [target_log_kernel, vals_bound, bounds_type, lower_bounds, upper_bounds] (const arma::vec& vals_inp, arma::vec* grad_out, void* target_data) -> double {
         //
         if (vals_bound) {
             arma::vec vals_inv_trans = inv_transform(vals_inp, bounds_type, lower_bounds, upper_bounds);
 
-            return target_log_kernel(vals_inv_trans, target_data) + log_jacobian(vals_inp, bounds_type, lower_bounds, upper_bounds);
+            return target_log_kernel(vals_inv_trans, nullptr, target_data) + log_jacobian(vals_inp, bounds_type, lower_bounds, upper_bounds);
         } else {
-            return target_log_kernel(vals_inp, target_data);
+            return target_log_kernel(vals_inp, nullptr, target_data);
+        }
+    };
+
+    std::function<arma::vec (const arma::vec& vals_inp, void* target_data, const double step_size, arma::mat* jacob_matrix_out)> mala_mean_fn = [target_log_kernel, vals_bound, bounds_type, lower_bounds, upper_bounds] (const arma::vec& vals_inp, void* target_data, const double step_size, arma::mat* jacob_matrix_out) -> arma::vec {
+
+        const int n_vals = vals_inp.n_elem;
+        arma::vec grad_obj(n_vals);
+
+        if (vals_bound) {
+
+            arma::vec vals_inv_trans = inv_transform(vals_inp, bounds_type, lower_bounds, upper_bounds);
+
+            target_log_kernel(vals_inv_trans,&grad_obj,target_data);
+
+            //
+
+            arma::mat jacob_matrix = inv_jacobian_adjust(vals_inp,bounds_type,lower_bounds,upper_bounds);
+
+            if (jacob_matrix_out) {
+                *jacob_matrix_out = jacob_matrix;
+            }
+
+            //
+
+            arma::vec prop_vals_out = vals_inp + step_size * step_size * jacob_matrix * grad_obj / 2.0;
+
+            return prop_vals_out;
+        } else {
+            target_log_kernel(vals_inp,&grad_obj,target_data);
+
+            arma::vec prop_vals_out = vals_inp + step_size * step_size * grad_obj / 2.0;
+
+            return prop_vals_out;
         }
     };
 
@@ -77,14 +108,11 @@ mcmc::rwmh_int(const arma::vec& initial_vals, arma::mat& draws_out, std::functio
 
     draws_out.set_size(n_draws_keep, n_vals);
 
-    double prev_LP = box_log_kernel(first_draw, target_data);
+    double prev_LP = box_log_kernel(first_draw, nullptr, target_data);
     double prop_LP = prev_LP;
     
     arma::vec prev_draw = first_draw;
     arma::vec new_draw  = first_draw;
-    
-    arma::mat cov_mcmc_sc   = par_scale * par_scale * cov_mcmc;
-    arma::mat cov_mcmc_chol = arma::chol(cov_mcmc_sc,"lower");
 
     //
 
@@ -94,9 +122,9 @@ mcmc::rwmh_int(const arma::vec& initial_vals, arma::mat& draws_out, std::functio
     
     for (int jj = 0; jj < n_draws_keep + n_draws_burnin; jj++) {
 
-        new_draw = prev_draw + cov_mcmc_chol * krand.randn();
+        new_draw = mala_mean_fn(prev_draw, target_data, step_size, nullptr) + step_size * krand.randn();
         
-        prop_LP = box_log_kernel(new_draw, target_data);
+        prop_LP = box_log_kernel(new_draw, nullptr, target_data);
         
         if (!std::isfinite(prop_LP)) {
             prop_LP = BIG_NEG_VAL;
@@ -104,7 +132,7 @@ mcmc::rwmh_int(const arma::vec& initial_vals, arma::mat& draws_out, std::functio
 
         //
 
-        comp_val = prop_LP - prev_LP;
+        comp_val = prop_LP - prev_LP + mala_prop_adjustment(new_draw, prev_draw, step_size, vals_bound, mala_mean_fn, target_data);
         
         if (comp_val > 0.0) { // the '> exp(0)' case; works around taking exp of big values and receiving an error
             prev_draw = new_draw;
@@ -147,7 +175,7 @@ mcmc::rwmh_int(const arma::vec& initial_vals, arma::mat& draws_out, std::functio
     }
 
     if (settings_inp) {
-        settings_inp->rwmh_accept_rate = (double) n_accept / (double) n_draws_keep;
+        settings_inp->mala_accept_rate = (double) n_accept / (double) n_draws_keep;
     }
 
     //
@@ -158,13 +186,13 @@ mcmc::rwmh_int(const arma::vec& initial_vals, arma::mat& draws_out, std::functio
 // wrappers
 
 bool
-mcmc::rwmh(const arma::vec& initial_vals, arma::mat& draws_out, std::function<double (const arma::vec& vals_inp, void* target_data)> target_log_kernel, void* target_data)
+mcmc::mala(const arma::vec& initial_vals, arma::mat& draws_out, std::function<double (const arma::vec& vals_inp, arma::vec* grad_out, void* target_data)> target_log_kernel, void* target_data)
 {
-    return rwmh_int(initial_vals,draws_out,target_log_kernel,target_data,nullptr);
+    return mala_int(initial_vals,draws_out,target_log_kernel,target_data,nullptr);
 }
 
 bool
-mcmc::rwmh(const arma::vec& initial_vals, arma::mat& draws_out, std::function<double (const arma::vec& vals_inp, void* target_data)> target_log_kernel, void* target_data, mcmc_settings& settings)
+mcmc::mala(const arma::vec& initial_vals, arma::mat& draws_out, std::function<double (const arma::vec& vals_inp, arma::vec* grad_out, void* target_data)> target_log_kernel, void* target_data, mcmc_settings& settings)
 {
-    return rwmh_int(initial_vals,draws_out,target_log_kernel,target_data,&settings);
+    return mala_int(initial_vals,draws_out,target_log_kernel,target_data,&settings);
 }

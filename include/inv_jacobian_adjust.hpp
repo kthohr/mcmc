@@ -17,30 +17,32 @@
   ################################################################################*/
  
 /*
- * log Jacobian adjustment
+ * inverse Jacobian adjustment
  */
 
 inline
-double
-log_jacobian(const arma::vec& vals_trans_inp, const arma::uvec& bounds_type, const arma::vec& lower_bounds, const arma::vec& upper_bounds)
+arma::mat
+inv_jacobian_adjust(const arma::vec& vals_trans_inp, const arma::uvec& bounds_type, const arma::vec& lower_bounds, const arma::vec& upper_bounds)
 {
     const int n_vals = bounds_type.n_elem;
 
-    double ret_val = 0.0;
+    arma::mat ret_mat = arma::eye(n_vals,n_vals);
 
     for (int i=0; i < n_vals; i++) {
         switch (bounds_type(i)) {
             case 2: // lower bound only
-                ret_val += vals_trans_inp(i);
+                ret_mat(i,i) = 1.0 / std::exp(vals_trans_inp(i));
                 break;
             case 3: // upper bound only
-                ret_val += - vals_trans_inp(i);
+                ret_mat(i,i) = 1.0 / std::exp(-vals_trans_inp(i));
                 break;
             case 4: // upper and lower bounds
-                ret_val += std::log(upper_bounds(i) - lower_bounds(i)) + vals_trans_inp(i) - 2 * std::log(1 + std::exp(vals_trans_inp(i)));
+                ret_mat(i,i) = 1.0 / ( std::exp(vals_trans_inp(i))*(upper_bounds(i) - lower_bounds(i)) / std::pow(std::exp(vals_trans_inp(i)) + 1,2) );
                 break;
         }
     }
+
     //
-    return ret_val;
+    
+    return ret_mat;
 }
