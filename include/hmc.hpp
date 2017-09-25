@@ -15,39 +15,20 @@
   ##   GNU General Public License for more details.
   ##
   ################################################################################*/
+ 
+/*
+ * Hamiltonian Monte Carlo
+ */
 
-#ifndef MCMC_INCLUDES
-#define MCMC_INCLUDES
-
-#ifdef USE_RCPP_ARMADILLO
-    #include <RcppArmadillo.h>
-#else
-    #ifndef ARMA_DONT_USE_WRAPPER
-        #define ARMA_DONT_USE_WRAPPER
-    #endif
-    #include "armadillo"
-#endif
-
-#include "mcmc_options.hpp"
-#include "stats/dnorm.hpp"
-
-namespace mcmc
-{
-    // structs
-    #include "mcmc_structs.hpp"
-
-    // utility files
-    #include "determine_bounds_type.hpp"
-    #include "transform_vals.hpp"
-    #include "log_jacobian.hpp"
-    #include "inv_jacobian_adjust.hpp"
-
-    // MCMC routines
-    #include "rwmh.hpp"
-    #include "mala.hpp"
-    #include "hmc.hpp"
-
-    #include "de.hpp"
-}
-
-#endif
+ #ifndef _mcmc_hmc_HPP
+ #define _mcmc_hmc_HPP
+ 
+ bool hmc_int(const arma::vec& initial_vals, arma::mat& draws_out, std::function<double (const arma::vec& vals_inp, arma::vec* grad_out, void* target_data)> target_log_kernel, void* target_data, mcmc_settings* settings_inp);
+ 
+ bool hmc(const arma::vec& initial_vals, arma::mat& draws_out, std::function<double (const arma::vec& vals_inp, arma::vec* grad_out, void* target_data)> target_log_kernel, void* target_data);
+ bool hmc(const arma::vec& initial_vals, arma::mat& draws_out, std::function<double (const arma::vec& vals_inp, arma::vec* grad_out, void* target_data)> target_log_kernel, void* target_data, mcmc_settings& settings);
+ 
+ //
+ 
+ #endif
+ 

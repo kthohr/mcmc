@@ -42,6 +42,14 @@ struct mcmc_settings {
 
     double de_accept_rate; // will be returned by the function
 
+    // HMC
+    int hmc_n_draws = 1E04;
+    int hmc_n_burnin = 1E04;
+
+    double hmc_step_size = 1.0;
+
+    double hmc_accept_rate; // will be returned by the function
+
     // MALA
     int mala_n_draws = 1E04;
     int mala_n_burnin = 1E04;
