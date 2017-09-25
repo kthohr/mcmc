@@ -113,8 +113,7 @@ mcmc::hmc_int(const arma::vec& initial_vals, arma::mat& draws_out, std::function
     double prev_U = - box_log_kernel(first_draw, nullptr, target_data);
     double prop_U = prev_U;
 
-    double prev_K = arma::dot(first_draw,first_draw) / 2.0;
-    double prop_K = prev_K;
+    double prop_K, prev_K;
     
     arma::vec prev_draw = first_draw;
     arma::vec new_draw  = first_draw;
@@ -131,18 +130,24 @@ mcmc::hmc_int(const arma::vec& initial_vals, arma::mat& draws_out, std::function
 
         krand.randn();
 
-        new_mntm = mntm_update_fn(prev_draw,krand,target_data,step_size,nullptr);
+        new_mntm = mntm_update_fn(prev_draw,krand,target_data,step_size,nullptr); // half-step
+        prev_K = arma::dot(krand,krand) / 2.0;
+
+        //
 
         new_draw = prev_draw + step_size*new_mntm;
         
         prop_U = - box_log_kernel(new_draw, nullptr, target_data);
-        prop_K = arma::dot(new_draw,new_draw) / 2.0;
         
         if (!std::isfinite(prop_U)) {
             prop_U = -BIG_NEG_VAL;
         }
 
-        new_mntm = mntm_update_fn(new_draw,new_mntm,target_data,step_size,nullptr);
+        //
+
+        new_mntm = mntm_update_fn(new_draw,new_mntm,target_data,step_size,nullptr); // half-step
+
+        prop_K = arma::dot(new_mntm,new_mntm) / 2.0;
 
         //
 
