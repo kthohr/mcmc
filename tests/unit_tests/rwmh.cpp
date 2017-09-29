@@ -92,7 +92,7 @@ int main()
     //
     //
 
-    mcmc::mcmc_settings settings;
+    mcmc::algo_settings settings;
 
     arma::vec lb(1);
     lb(0) = 0.0;

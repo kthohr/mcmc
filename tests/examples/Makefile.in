@@ -5,7 +5,7 @@ CXX = @CXX@
 FC  = @FC@
 
 CXX_STD = -std=c++11
-OPT_FLAGS = @MCMC_OPT_FLAGS@
+OPT_FLAGS = @MCMC_WARN_FLAGS@ @MCMC_OPT_FLAGS@
 
 ARMA_INCLUDE_PATH = @ARMA_INCLUDE_PATH@
 
@@ -19,11 +19,11 @@ MCMC_HEADER_DIR = @MCMC_INCLUDE_PATH@
 MCMC_TEST_DIR = .
 
 # general flags
-CXXFLAGS = $(CXX_STD) -Wall $(OPT_FLAGS) -I$(ARMA_INCLUDE_PATH) -I$(MCMC_HEADER_DIR)
+CXXFLAGS = $(CXX_STD) $(OPT_FLAGS) -I$(ARMA_INCLUDE_PATH) -I$(MCMC_HEADER_DIR)
 LIBS= -L@MCMC_INSTALL_PATH@ -l@MCMC_SHLIB_NAME@ @MCMC_BLAS_LAPACK@
 
 # TraME Test Files
-SOURCES_MCMC= $(MCMC_TEST_DIR)/de_normal.cpp $(MCMC_TEST_DIR)/hmc_normal.cpp $(MCMC_TEST_DIR)/mala_normal.cpp $(MCMC_TEST_DIR)/rwmh_normal.cpp
+SOURCES_MCMC= $(MCMC_TEST_DIR)/aees_mixture.cpp $(MCMC_TEST_DIR)/de_normal.cpp $(MCMC_TEST_DIR)/hmc_normal.cpp $(MCMC_TEST_DIR)/mala_normal.cpp $(MCMC_TEST_DIR)/rwmh_normal.cpp
 OBJECTS_MCMC= $(SOURCES_MCMC:.cpp=.test)
 
 all: $(OBJECTS_MCMC)

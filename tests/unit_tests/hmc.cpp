@@ -80,7 +80,7 @@
      initial_val(0) = mu + 1; // mu
      initial_val(1) = sigma + 1; // sigma
  
-     mcmc::mcmc_settings settings;
+     mcmc::algo_settings settings;
  
      settings.hmc_step_size = 0.10;
      settings.hmc_n_burnin = 1000;

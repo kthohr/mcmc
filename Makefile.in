@@ -29,7 +29,7 @@ LIBS= @MCMC_BLAS_LAPACK@
 
 # core MCMC files
 
-SOURCES_MCMC= $(MCMC_SRC_DIR)/de.cpp $(MCMC_SRC_DIR)/hmc.cpp $(MCMC_SRC_DIR)/mala.cpp $(MCMC_SRC_DIR)/rwmh.cpp
+SOURCES_MCMC= $(MCMC_SRC_DIR)/aees.cpp $(MCMC_SRC_DIR)/de.cpp $(MCMC_SRC_DIR)/hmc.cpp $(MCMC_SRC_DIR)/mala.cpp $(MCMC_SRC_DIR)/rwmh.cpp
 OBJECTS_MCMC= $(SOURCES_MCMC:.cpp=.o)
 
 all: $(MCMC_DIR)/$(SHLIB) $(OBJECTS_MCMC)

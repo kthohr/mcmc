@@ -80,7 +80,7 @@
      initial_val(0) = mu + 1; // mu
      initial_val(1) = sigma + 1; // sigma
  
-     mcmc::mcmc_settings settings;
+     mcmc::algo_settings settings;
  
      settings.hmc_step_size = 0.1;
      settings.hmc_n_burnin = 1000;
@@ -100,7 +100,7 @@
      //
      //
  
-     // mcmc::mcmc_settings settings;
+     // mcmc::algo_settings settings;
  
      // arma::vec lb(1);
      // lb(0) = 0.0;

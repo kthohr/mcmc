@@ -19,12 +19,21 @@
 #ifndef mcmc_structs_HPP
 #define mcmc_structs_HPP
 
-struct mcmc_settings {
+struct algo_settings {
     // general
     bool vals_bound = false;
 
     arma::vec lower_bounds;
     arma::vec upper_bounds;
+
+    // AEES
+    int aees_n_draws = 1E04;
+    int aees_n_initial_draws = 1E03;
+    int aees_n_burnin = 1E03;
+
+    arma::vec aees_temper_vec;
+    double aees_prob_par = 0.10;
+    int aees_n_rings = 5;
 
     // DE
     bool de_jumps = false;

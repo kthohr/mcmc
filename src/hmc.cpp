@@ -23,7 +23,7 @@
 #include "mcmc.hpp" 
 
 bool
-mcmc::hmc_int(const arma::vec& initial_vals, arma::mat& draws_out, std::function<double (const arma::vec& vals_inp, arma::vec* grad_out, void* target_data)> target_log_kernel, void* target_data, mcmc_settings* settings_inp)
+mcmc::hmc_int(const arma::vec& initial_vals, arma::mat& draws_out, std::function<double (const arma::vec& vals_inp, arma::vec* grad_out, void* target_data)> target_log_kernel, void* target_data, algo_settings* settings_inp)
 {
     bool success = false;
 
@@ -33,7 +33,7 @@ mcmc::hmc_int(const arma::vec& initial_vals, arma::mat& draws_out, std::function
     //
     // MALA settings
 
-    mcmc_settings settings;
+    algo_settings settings;
 
     if (settings_inp) {
         settings = *settings_inp;
@@ -213,7 +213,7 @@ mcmc::hmc(const arma::vec& initial_vals, arma::mat& draws_out, std::function<dou
 }
 
 bool
-mcmc::hmc(const arma::vec& initial_vals, arma::mat& draws_out, std::function<double (const arma::vec& vals_inp, arma::vec* grad_out, void* target_data)> target_log_kernel, void* target_data, mcmc_settings& settings)
+mcmc::hmc(const arma::vec& initial_vals, arma::mat& draws_out, std::function<double (const arma::vec& vals_inp, arma::vec* grad_out, void* target_data)> target_log_kernel, void* target_data, algo_settings& settings)
 {
     return hmc_int(initial_vals,draws_out,target_log_kernel,target_data,&settings);
 }

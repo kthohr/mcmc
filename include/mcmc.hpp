@@ -47,6 +47,7 @@ namespace mcmc
     #include "mala.hpp"
     #include "hmc.hpp"
 
+    #include "aees.hpp"
     #include "de.hpp"
 }
 
