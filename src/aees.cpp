@@ -149,12 +149,12 @@ mcmc::aees_int(const arma::vec& initial_vals, arma::mat& draws_out, std::functio
                         // construct rings
 
                         for (int i=0; i < (n_rings-1); i++) {
-							ring_vals(j-1,i) = (past_kernel_vals((i+1)*ring_spacing_ind) + past_kernel_vals((i+1)*ring_spacing_ind-1)) / 2.0;
+                            ring_vals(j-1,i) = (past_kernel_vals((i+1)*ring_spacing_ind) + past_kernel_vals((i+1)*ring_spacing_ind-1)) / 2.0;
                         }
                         
                         int level = 0;
-						while ( level < (n_rings-1) && kernel_vals(j,n-1) > ring_vals(j-1,level) ) {
-							level++;
+                        while ( level < (n_rings-1) && kernel_vals(j,n-1) > ring_vals(j-1,level) ) {
+                            level++;
                         }
 
                         //
