@@ -28,7 +28,7 @@ mcmc::de_int(const arma::vec& initial_vals, arma::cube& draws_out, std::function
     bool success = false;
 
     const double BIG_NEG_VAL = MCMC_BIG_NEG_VAL;
-	const int n_vals = initial_vals.n_elem;
+    const int n_vals = initial_vals.n_elem;
     
     //
     // DE settings
@@ -161,7 +161,7 @@ mcmc::de_int(const arma::vec& initial_vals, arma::cube& draws_out, std::function
 
     //
     
-	if (vals_bound) {
+    if (vals_bound) {
 #ifdef MCMC_USE_OMP
         #pragma omp parallel for
 #endif
@@ -170,15 +170,15 @@ mcmc::de_int(const arma::vec& initial_vals, arma::cube& draws_out, std::function
                 draws_out.slice(ii).row(jj) = arma::trans(inv_transform(draws_out.slice(ii).row(jj).t(), bounds_type, lower_bounds, upper_bounds));
             }
         }
-	}
-	
+    }
+    
     if (settings_inp) {
-	    settings_inp->de_accept_rate = (double) n_accept / (double) (n_pop*n_gen);
+        settings_inp->de_accept_rate = (double) n_accept / (double) (n_pop*n_gen);
     }
 
     //
     
-	return success;
+    return success;
 }
 
 // wrappers
