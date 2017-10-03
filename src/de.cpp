@@ -133,11 +133,12 @@ mcmc::de_int(const arma::vec& initial_vals, arma::cube& draws_out, std::function
                     prop_kernel_val = BIG_NEG_VAL;
                 }
                 
-                double comp_val = prop_kernel_val - target_vals(i);
-
                 //
+                
+                double comp_val = prop_kernel_val - target_vals(i);
+                double z = arma::as_scalar(arma::randu(1,1));
 
-                if (comp_val > temperature_j * std::log(arma::as_scalar(arma::randu(1)))) {
+                if (comp_val > temperature_j * std::log(z)) {
                     X.row(i) = X_prop;
                     
                     target_vals(i) = prop_kernel_val;

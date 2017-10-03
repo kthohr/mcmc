@@ -122,8 +122,7 @@ mcmc::hmc_int(const arma::vec& initial_vals, arma::mat& draws_out, std::function
 
     //
 
-    int n_accept = 0;    
-    double comp_val, rand_val;
+    int n_accept = 0;
     arma::vec krand(n_vals);
     
     for (int jj = 0; jj < n_draws_keep + n_draws_burnin; jj++) {
@@ -151,9 +150,10 @@ mcmc::hmc_int(const arma::vec& initial_vals, arma::mat& draws_out, std::function
 
         //
 
-        comp_val = - prop_U - prop_K + prev_U + prev_K;
-        
-        if (comp_val > 0.0) { // the '> exp(0)' case; works around taking exp of big values and receiving an error
+        double comp_val = std::min(0.0,- prop_U - prop_K + prev_U + prev_K);
+        double z = arma::as_scalar(arma::randu(1));
+
+        if (z < std::exp(comp_val)) {
             prev_draw = new_draw;
             prev_U = prop_U;
             prev_K = prop_K;
@@ -163,21 +163,8 @@ mcmc::hmc_int(const arma::vec& initial_vals, arma::mat& draws_out, std::function
                 n_accept++;
             }
         } else {
-            rand_val = arma::as_scalar(arma::randu(1));
-
-            if (rand_val < std::exp(comp_val)) {
-                prev_draw = new_draw;
-                prev_U = prop_U;
-                prev_K = prop_K;
-
-                if (jj >= n_draws_burnin) {
-                    draws_out.row(jj - n_draws_burnin) = new_draw.t();
-                    n_accept++;
-                }
-            } else {
-                if (jj >= n_draws_burnin) {
-                    draws_out.row(jj - n_draws_burnin) = prev_draw.t();
-                }
+            if (jj >= n_draws_burnin) {
+                draws_out.row(jj - n_draws_burnin) = prev_draw.t();
             }
         }
     }
