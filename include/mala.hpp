@@ -32,11 +32,11 @@ bool mala(const arma::vec& initial_vals, arma::mat& draws_out, std::function<dou
 
 inline
 double
-mala_prop_adjustment(const arma::vec& prop_vals, const arma::vec& prev_vals, const double step_size, const bool vals_bound, std::function<arma::vec (const arma::vec& vals_inp, void* target_data, const double step_size, arma::mat* jacob_matrix_out)> mala_mean_fn, void* target_data)
+mala_prop_adjustment(const arma::vec& prop_vals, const arma::vec& prev_vals, const double step_size, const bool vals_bound, const arma::mat& precond_mat, std::function<arma::vec (const arma::vec& vals_inp, void* target_data, const double step_size, arma::mat* jacob_matrix_out)> mala_mean_fn, void* target_data)
 {
-    const int n_vals = prop_vals.n_elem;
 
     double ret_val = 0;
+    const double step_size_sq = step_size*step_size;
 
     //
 
@@ -47,17 +47,13 @@ mala_prop_adjustment(const arma::vec& prop_vals, const arma::vec& prev_vals, con
         arma::vec prop_mean = mala_mean_fn(prop_vals, target_data, step_size, &prop_inv_jacob);
         arma::vec prev_mean = mala_mean_fn(prev_vals, target_data, step_size, &prev_inv_jacob);
 
-        for (int i=0; i < n_vals; i++) {
-            ret_val += stats_mcmc::dnorm(prev_vals(i),prop_mean(i),step_size * std::sqrt(prop_inv_jacob(i,i)),true) - stats_mcmc::dnorm(prop_vals(i),prev_mean(i),step_size * std::sqrt(prev_inv_jacob(i,i)),true);
-        }
+        ret_val = stats_mcmc::dmvnorm(prev_vals, prop_mean, step_size_sq*prop_inv_jacob*precond_mat, true) - stats_mcmc::dmvnorm(prop_vals, prev_mean, step_size_sq*prop_inv_jacob*precond_mat, true);
 
     } else {
         arma::vec prop_mean = mala_mean_fn(prop_vals, target_data, step_size, nullptr);
         arma::vec prev_mean = mala_mean_fn(prev_vals, target_data, step_size, nullptr);
 
-        for (int i=0; i < n_vals; i++) {
-            ret_val += stats_mcmc::dnorm(prev_vals(i),prop_mean(i),step_size,true) - stats_mcmc::dnorm(prop_vals(i),prev_mean(i),step_size,true);
-        }
+        ret_val = stats_mcmc::dmvnorm(prev_vals, prop_mean, step_size_sq*precond_mat, true) - stats_mcmc::dmvnorm(prop_vals, prev_mean, step_size_sq*precond_mat, true);
     }
 
     //

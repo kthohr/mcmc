@@ -56,6 +56,7 @@ struct algo_settings {
     int hmc_n_burnin = 1E04;
 
     double hmc_step_size = 1.0;
+    arma::mat hmc_precond_mat;
 
     double hmc_accept_rate; // will be returned by the function
 
@@ -64,6 +65,7 @@ struct algo_settings {
     int mala_n_burnin = 1E04;
 
     double mala_step_size = 1.0;
+    arma::mat mala_precond_mat;
 
     double mala_accept_rate; // will be returned by the function
 

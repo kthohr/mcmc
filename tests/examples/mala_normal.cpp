@@ -82,11 +82,10 @@ int main()
 
     mcmc::algo_settings settings;
 
-    settings.mala_step_size = 0.75;
-    settings.mala_n_burnin = 1000;
-    settings.mala_n_draws = 1000;
+    settings.mala_step_size = 1.5;
+    settings.mala_n_burnin = 2000;
+    settings.mala_n_draws = 2000;
 
-    printf("begin run\n");
     arma::mat draws_out;
     mcmc::mala(initial_val,draws_out,log_target_dens,&dta,settings);
 
@@ -95,6 +94,23 @@ int main()
     std::cout << "acceptance rate = " << settings.mala_accept_rate << arma::endl;
 
     std::cout << "mcmc mean = " << arma::mean(draws_out) << std::endl;
+    std::cout << "mcmc var:\n"  << arma::cov(draws_out) << std::endl;
+
+    //
+    // with preconditioning
+
+    arma::mat precond_mat = arma::zeros(2,2);
+    precond_mat(0,0) = sigma*sigma / static_cast<double>(n_data);
+    precond_mat(1,1) = sigma*sigma / static_cast<double>(2*n_data);
+
+    settings.mala_precond_mat = precond_mat;
+
+    mcmc::mala(initial_val,draws_out,log_target_dens,&dta,settings);
+
+    std::cout << "acceptance rate = " << settings.mala_accept_rate << arma::endl;
+
+    std::cout << "mcmc mean = " << arma::mean(draws_out) << std::endl;
+    std::cout << "mcmc var:\n"  << arma::cov(draws_out) << std::endl;
 
     //
     //

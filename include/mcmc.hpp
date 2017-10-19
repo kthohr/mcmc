@@ -30,6 +30,7 @@
 
 #include "mcmc_options.hpp"
 #include "stats/dnorm.hpp"
+#include "stats/dmvnorm.hpp"
 
 namespace mcmc
 {
