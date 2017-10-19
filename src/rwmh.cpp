@@ -88,7 +88,7 @@ mcmc::rwmh_int(const arma::vec& initial_vals, arma::mat& draws_out, std::functio
 
     //
 
-    int n_accept = 0;    
+    int n_accept = 0;
     arma::vec krand(n_vals);
     
     for (int jj = 0; jj < n_draws_keep + n_draws_burnin; jj++) {
