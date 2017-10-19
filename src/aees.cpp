@@ -45,11 +45,17 @@ mcmc::aees_int(const arma::vec& initial_vals, arma::mat& draws_out, std::functio
 
     const double ee_prob_par = settings.aees_prob_par;
 
+    // temperature vector: add T = 1 and sort
+
     arma::vec temper_vec = settings.aees_temper_vec;
     const int K = temper_vec.n_elem + 1;
     
     temper_vec.resize(K);
     temper_vec(K-1) = 1.0;
+
+    temper_vec = arma::sort(temper_vec,"descend");
+
+    //
 
     const int n_rings = settings.aees_n_rings;
 
@@ -107,9 +113,6 @@ mcmc::aees_int(const arma::vec& initial_vals, arma::mat& draws_out, std::functio
     double val_out; // holds kernel value
 
     for (int n=0; n < (total_draws); n++) {
-
-        //
-        // highest temperature
     
         arma::mat X_prev = X_new;
         kernel_vals_prev = kernel_vals_new;
@@ -118,7 +121,7 @@ mcmc::aees_int(const arma::vec& initial_vals, arma::mat& draws_out, std::functio
         
         kernel_vals_new.col(0).fill(val_out);
         
-        // loop down
+        // loop down temperature vector
 
         for (int j=1; j < K; j++) {
             if (n > j*(n_initial_draws + n_burnin)) {
@@ -134,9 +137,9 @@ mcmc::aees_int(const arma::vec& initial_vals, arma::mat& draws_out, std::functio
 
                     int initial_j = (j-1)*(n_initial_draws + n_burnin);
 
-                    int ring_spacing_ind = std::floor( (n - initial_j + 1) / n_rings);
+                    int ring_ind_spacing = std::floor( (n - initial_j + 1) / n_rings);
                     
-                    if (ring_spacing_ind == 0) {
+                    if (ring_ind_spacing == 0) {
                         X_new.col(j) = X_prev.col(j);
                         kernel_vals_new.col(j) = kernel_vals_prev.col(j);
                     } else {
@@ -149,24 +152,23 @@ mcmc::aees_int(const arma::vec& initial_vals, arma::mat& draws_out, std::functio
                         // construct rings
 
                         for (int i=0; i < (n_rings-1); i++) {
-                            ring_vals(j-1,i) = (past_kernel_vals((i+1)*ring_spacing_ind) + past_kernel_vals((i+1)*ring_spacing_ind-1)) / 2.0;
+                            ring_vals(j-1,i) = (past_kernel_vals((i+1)*ring_ind_spacing) + past_kernel_vals((i+1)*ring_ind_spacing-1)) / 2.0;
                         }
                         
-                        int level = 0;
-                        while ( level < (n_rings-1) && kernel_vals(j,n-1) > ring_vals(j-1,level) ) {
-                            level++;
+                        int which_ring = 0;
+                        while ( which_ring < (n_rings-1) && kernel_vals(j,n-1) > ring_vals(j-1,which_ring) ) {
+                            which_ring++;
                         }
 
                         //
 
                         double z_tmp = arma::as_scalar(arma::randu());
 
-                        int c_ind = ring_spacing_ind*level + std::floor(z_tmp * ring_spacing_ind);
-                        int ind_aux = sort_ind(c_ind);
+                        int ind_mix = sort_ind( static_cast<int>(ring_ind_spacing*which_ring + std::floor(z_tmp * ring_ind_spacing)) );
 
                         //
 
-                        X_new.col(j) = X_out.slice(ind_aux).col(j-1);
+                        X_new.col(j) = X_out.slice(ind_mix).col(j-1);
 
                         val_out = box_log_kernel(X_new.col(j), target_data);
 
@@ -189,13 +191,11 @@ mcmc::aees_int(const arma::vec& initial_vals, arma::mat& draws_out, std::functio
                 }
 
                 // store target kernel values
-            
                 kernel_vals(j,n) = box_log_kernel(X_new.col(j), target_data); // temperature = 1
             }
         }
         
         // store draws
-
         X_out.slice(n) = X_new;
     }
 

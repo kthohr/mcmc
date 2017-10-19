@@ -106,7 +106,7 @@ int main()
 
     mcmc::aees(mu.col(0),draws_out,target_log_kernel,&dta,settings);
 
-    draws_out.save("aees_res.txt",arma::raw_ascii);
+    // draws_out.save("aees_res.txt",arma::raw_ascii);
 
     //
 
