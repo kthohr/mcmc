@@ -56,6 +56,7 @@ struct algo_settings {
     int hmc_n_burnin = 1E04;
 
     double hmc_step_size = 1.0;
+    int hmc_leap_steps = 1; // number of leap frog steps
     arma::mat hmc_precond_mat;
 
     double hmc_accept_rate; // will be returned by the function

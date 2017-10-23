@@ -53,7 +53,7 @@ mcmc::aees_int(const arma::vec& initial_vals, arma::mat& draws_out, std::functio
     temper_vec.resize(K);
     temper_vec(K-1) = 1.0;
 
-    temper_vec = arma::sort(temper_vec,"descend");
+    temper_vec = arma::sort(temper_vec,"descend"); // largest to smallest
 
     //
 
