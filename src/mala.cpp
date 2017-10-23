@@ -17,7 +17,7 @@
   ################################################################################*/
  
 /*
- * Metropolis-adjusted Langevin algorithm
+ * Metropolis-adjusted Langevin algorithm (MALA)
  */
 
 #include "mcmc.hpp" 
@@ -166,7 +166,7 @@ mcmc::mala_int(const arma::vec& initial_vals, arma::mat& draws_out, std::functio
     }
 
     if (settings_inp) {
-        settings_inp->mala_accept_rate = (double) n_accept / (double) n_draws_keep;
+        settings_inp->mala_accept_rate = static_cast<double>(n_accept) / static_cast<double>(n_draws_keep);
     }
 
     //

@@ -174,7 +174,7 @@ mcmc::de_int(const arma::vec& initial_vals, arma::cube& draws_out, std::function
     }
     
     if (settings_inp) {
-        settings_inp->de_accept_rate = (double) n_accept / (double) (n_pop*n_gen);
+        settings_inp->de_accept_rate = static_cast<double>(n_accept) / static_cast<double>(n_pop*n_gen);
     }
 
     //

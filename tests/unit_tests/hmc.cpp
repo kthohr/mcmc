@@ -39,7 +39,7 @@
  
      //
  
-     const double ret = - ((double) n_vals) * (0.5*std::log(2*pi) + std::log(sigma)) - arma::accu( arma::pow(x - mu,2) / (2*sigma*sigma) );
+     const double ret = - static_cast<double>(n_vals) * (0.5*std::log(2*pi) + std::log(sigma)) - arma::accu( arma::pow(x - mu,2) / (2*sigma*sigma) );
  
      //
  
@@ -52,7 +52,7 @@
          double m_2 = arma::accu( arma::pow(x - mu,2) );
  
          (*grad_out)(0,0) = m_1 / (sigma*sigma);
-         (*grad_out)(1,0) = (m_2 / (sigma*sigma*sigma)) - ((double) n_vals) / sigma;
+         (*grad_out)(1,0) = (m_2 / (sigma*sigma*sigma)) - static_cast<double>(n_vals) / sigma;
      }
  
      //

@@ -135,7 +135,7 @@ mcmc::rwmh_int(const arma::vec& initial_vals, arma::mat& draws_out, std::functio
     }
 
     if (settings_inp) {
-        settings_inp->rwmh_accept_rate = (double) n_accept / (double) n_draws_keep;
+        settings_inp->rwmh_accept_rate = static_cast<double>(n_accept) / static_cast<double>(n_draws_keep);
     }
 
     //

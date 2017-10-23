@@ -37,7 +37,7 @@ gaussian_mixture(const arma::vec& X_vec_inp, const arma::vec& weights, const arm
     for (int i=0; i < n_mix; i++) {
         double dist_val = arma::accu(arma::pow(X_vec_inp - mu.col(i),2));
         
-        dens_val += weights(i) * std::exp(-0.5*dist_val/sig_sq(i)) / std::pow(2.0*pi*sig_sq(i), (double) n_vals/2.0);
+        dens_val += weights(i) * std::exp(-0.5*dist_val/sig_sq(i)) / std::pow(2.0*pi*sig_sq(i), static_cast<double>(n_vals)/2.0);
     }
 
     //
