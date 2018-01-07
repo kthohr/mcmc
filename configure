@@ -22,18 +22,11 @@ if [ -z ${FC+x} ]; then
     FC=gfortran
 fi
 
-if [[ !(-z ${KEITH_DEV_SETTINGS+x}) ]]; then
-    CC=gcc-mp-7
-    CXX=g++-mp-7
-    FC=gfortran-mp-7
-fi
-
 # compiler checks
 
 IS_DARWIN=$($CXX -dumpmachine 2>&1 | grep -i -c "darwin")
-APPLE_COMPILER=$($CXX --version 2>&1 | grep -i -c -E 'apple llvm')
-
-IS_FAST_OPT=0
+GCC_COMPILER=$($CXX --version 2>&1 | grep -i -c -E "gcc")
+# APPLE_COMPILER=$($CXX --version 2>&1 | grep -i -c -E 'apple llvm')
 
 # announcements
 
@@ -51,7 +44,6 @@ WDIR=${PWD}
 
 # look for Armadillo
 if [ -z ${ARMA_INCLUDE_PATH+x} ]; then
-    echo ""
     if [ -f ${WDIR}/include/armadillo ]; then 
         ARMA_INCLUDE_PATH="./include"
     elif [ -f /usr/include/armadillo ]; then
@@ -62,7 +54,8 @@ if [ -z ${ARMA_INCLUDE_PATH+x} ]; then
         ARMA_INCLUDE_PATH="/opt/include"
     elif [ -f /opt/local/include/armadillo ]; then
         ARMA_INCLUDE_PATH="/opt/local/include"
-    else 
+    else
+        echo ""
         echo "MCMC: cannot find armadillo files. Cloning from GitHub"
         echo ""
 
@@ -76,31 +69,27 @@ if [ -z ${ARMA_INCLUDE_PATH+x} ]; then
     fi
 fi
 
-echo "MCMC: ARMA_INCLUDE_PATH set to ${ARMA_INCLUDE_PATH}"
+echo "MCMC: ARMA_INCLUDE_PATH set to: ${ARMA_INCLUDE_PATH}"
 
 # set build and optimization flags
 
 if [[ "${MCMC_COVERAGE}" == "y" ]]; then 
     MCMC_OPT_FLAGS="-g -O0 -Wall --coverage -fno-inline -fno-inline-small-functions -fno-default-inline"
 else
-    if [[ "${MCMC_OPT}" == "fast" ]]; then
-        echo "MCMC: experimental optimization; use of NaN or +/-Inf not recognized"
-
-        IS_FAST_OPT=1
-
-        MCMC_OPT_FLAGS="-Ofast -march=native -DARMA_NO_DEBUG"
-    elif [[ "${MCMC_OPT}" == "native" ]]; then
-        IS_FAST_OPT=1
-
-        MCMC_OPT_FLAGS="-O3 -march=native -DARMA_NO_DEBUG"
+    if [[ "${MCMC_OPT}" == "" ]]; then
+        # MCMC_OPT_FLAGS="-Ofast -march=native -DARMA_NO_DEBUG"
+        # echo "MCMC: experimental optimization; use of NaN or +/-Inf not recognized"
+        MCMC_OPT_FLAGS="-O3 -flto -march=native -DARMA_NO_DEBUG"
     else
-        MCMC_OPT_FLAGS="-O3"
+        MCMC_OPT_FLAGS="${MCMC_OPT}"
     fi
 
     if [[ "${MCMC_PARALLEL}" == "y" ]]; then
         echo "MCMC: using OpenMP"
         MCMC_OPT_FLAGS="${MCMC_OPT_FLAGS} -fopenmp -DMCMC_USE_OMP"
     fi
+
+    echo "MCMC: optimization flags set to: ${MCMC_OPT_FLAGS}"
 fi
 
 MCMC_WARN_FLAGS="-Wall"
@@ -114,7 +103,7 @@ if [[ !("${MCMC_BUILD}" == "dev") ]]; then
         MCMC_INSTALL_PATH="/usr/local"
     fi
     echo ""
-    echo "MCMC: install path set to ${MCMC_INSTALL_PATH}"
+    echo "MCMC: install path set to: ${MCMC_INSTALL_PATH}"
 fi
 
 if [[ $OSTYPE == darwin* ]] ; then
@@ -151,11 +140,13 @@ else
     MCMC_SHLIB_FLAGS="${MCMC_OPT_FLAGS} ${MCMC_SHLIB_FLAGS}"
 fi
 
-if [ "$IS_FAST_OPT" -eq "1" ] && [ "$IS_DARWIN" -eq "1" ] && [ "$APPLE_COMPILER" -eq "0" ]; then
+if [ "$IS_DARWIN" -eq "1" ] && [ "$GCC_COMPILER" -eq "1" ]; then
     echo ""
     echo "MCMC: To enable AVX features, your compiler will use the Apple LLVM assembler"
     MCMC_OPT_FLAGS="-Wa,-q ${MCMC_OPT_FLAGS}"
 fi
+
+echo ""
 
 sed -e "s|@CC@|${CC}|" \
     -e "s|@CXX@|${CXX}|" \
