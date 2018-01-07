@@ -4,6 +4,8 @@
 
 MCMCLib is a lightweight C++ library of Markov Chain Monte Carlo (MCMC) methods.
 
+Features:
+
 * Parallelized C++11 implementations of several well-known MCMC methods, including:
     - Random Walk Metropolis-Hastings (RWMH);
     - Hamiltonian Monte Carlo (HMC); and
