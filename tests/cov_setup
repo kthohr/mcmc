@@ -6,12 +6,12 @@ export LD_LIBRARY_PATH="$PWD":$LD_LIBRARY_PATH
 cd tests
 
 cd examples
-./configure -b dev -c
+./configure -c -d
 make
 ./cov_check
 
 cd ../unit_tests
-./configure -b dev -c
+./configure -c -d
 make
 ./cov_check
 

@@ -9,7 +9,7 @@ install:
     - sudo apt-get install gfortran libblas-dev liblapack-dev
 
 script:
-  - ./configure -b dev -c
+  - ./configure -c -d
   - make
   - cd ./tests
   - ./cov_setup
