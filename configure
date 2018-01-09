@@ -2,10 +2,10 @@
 ## MCMC config script
 
 # inputs
-while getopts b:cm:o:p option; do
+while getopts cdm:o:p option; do
     case "${option}" in
-        b) MCMC_BUILD=${OPTARG};;
         c) MCMC_COVERAGE="y";;
+        d) MCMC_BUILD="dev";;
         m) MCMC_MATRIX_OPS=${OPTARG};;
         o) MCMC_OPT=${OPTARG};;
         p) MCMC_PARALLEL="y";;
