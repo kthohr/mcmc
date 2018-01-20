@@ -2,10 +2,11 @@
 ## MCMC config script
 
 # inputs
-while getopts cdm:o:p option; do
+while getopts cdgm:o:p option; do
     case "${option}" in
         c) MCMC_COVERAGE="y";;
         d) MCMC_BUILD="dev";;
+        g) MCMC_DEBUG="y";;
         m) MCMC_MATRIX_OPS=${OPTARG};;
         o) MCMC_OPT=${OPTARG};;
         p) MCMC_PARALLEL="y";;
@@ -42,19 +43,19 @@ fi
 # get working directory
 WDIR=${PWD}
 
-# look for Armadillo
 if [ -z ${ARMA_INCLUDE_PATH+x} ]; then
-    if [ -f ${WDIR}/include/armadillo ]; then 
-        ARMA_INCLUDE_PATH="./include"
-    elif [ -f /usr/include/armadillo ]; then
-        ARMA_INCLUDE_PATH="/usr/include"
-    elif [ -f /usr/local/include/armadillo ]; then
-        ARMA_INCLUDE_PATH="/usr/local/include"
-    elif [ -f /opt/include/armadillo ]; then
-        ARMA_INCLUDE_PATH="/opt/include"
-    elif [ -f /opt/local/include/armadillo ]; then
-        ARMA_INCLUDE_PATH="/opt/local/include"
-    else
+    
+    declare -a ARMA_DIRS=("${WDIR}/include" "/usr/include" "/usr/local/include" "/opt/include" "/opt/local/include")
+    ARMA_INCLUDE_PATH=
+
+    for i in "${ARMA_DIRS[@]}"; do
+        if [ -f "$i"/armadillo ]; then 
+            ARMA_INCLUDE_PATH="$i"
+            break
+        fi
+    done
+
+    if [[ $ARMA_INCLUDE_PATH == "" ]]; then
         echo ""
         echo "MCMC: cannot find armadillo files. Cloning from GitHub"
         echo ""
@@ -79,7 +80,7 @@ else
     if [[ "${MCMC_OPT}" == "" ]]; then
         # MCMC_OPT_FLAGS="-Ofast -march=native -DARMA_NO_DEBUG"
         # echo "MCMC: experimental optimization; use of NaN or +/-Inf not recognized"
-        MCMC_OPT_FLAGS="-O3 -flto -march=native -DARMA_NO_DEBUG"
+        MCMC_OPT_FLAGS="-O3 -march=native -ffp-contract=fast -flto -DARMA_NO_DEBUG"
     else
         MCMC_OPT_FLAGS="${MCMC_OPT}"
     fi
@@ -88,8 +89,6 @@ else
         echo "MCMC: using OpenMP"
         MCMC_OPT_FLAGS="${MCMC_OPT_FLAGS} -fopenmp -DMCMC_USE_OMP"
     fi
-
-    echo "MCMC: optimization flags set to: ${MCMC_OPT_FLAGS}"
 fi
 
 MCMC_WARN_FLAGS="-Wall"
@@ -134,17 +133,27 @@ if [[ !(-z ${MCMC_MATRIX_OPS+x}) ]]; then
     echo "MCMC: BLAS and Lapack libraries set to ${MCMC_BLAS_LAPACK}"
 fi
 
+if [ "$IS_DARWIN" -eq "1" ] && [ "$GCC_COMPILER" -eq "1" ]; then
+    echo ""
+    echo "MCMC: To enable AVX features, your compiler will use the Apple LLVM assembler"
+    MCMC_OPT_FLAGS="-Wa,-q ${MCMC_OPT_FLAGS}"
+fi
+
+# final optimization checks
+
+if [[ "${MCMC_DEBUG}" == "y" ]]; then
+    MCMC_OPT_FLAGS="-O0 -g"
+fi
+
 if [[ "${MCMC_COVERAGE}" == "y" ]]; then 
     MCMC_SHLIB_FLAGS="--coverage ${MCMC_SHLIB_FLAGS}"
 else
     MCMC_SHLIB_FLAGS="${MCMC_OPT_FLAGS} ${MCMC_SHLIB_FLAGS}"
 fi
 
-if [ "$IS_DARWIN" -eq "1" ] && [ "$GCC_COMPILER" -eq "1" ]; then
-    echo ""
-    echo "MCMC: To enable AVX features, your compiler will use the Apple LLVM assembler"
-    MCMC_OPT_FLAGS="-Wa,-q ${MCMC_OPT_FLAGS}"
-fi
+echo "MCMC: optimization flags set to: ${MCMC_OPT_FLAGS}"
+
+# end
 
 echo ""
 
