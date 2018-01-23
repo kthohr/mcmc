@@ -54,9 +54,13 @@ mcmc::mala_int(const arma::vec& initial_vals, arma::mat& draws_out, std::functio
 
     const arma::uvec bounds_type = determine_bounds_type(vals_bound, n_vals, lower_bounds, upper_bounds);
 
-    // lambda function for box constraints
+    //
+    // lambda functions for box constraints
 
-    std::function<double (const arma::vec& vals_inp, arma::vec* grad_out, void* box_data)> box_log_kernel = [target_log_kernel, vals_bound, bounds_type, lower_bounds, upper_bounds] (const arma::vec& vals_inp, arma::vec* grad_out, void* target_data) -> double {
+    std::function<double (const arma::vec& vals_inp, arma::vec* grad_out, void* box_data)> box_log_kernel \
+    = [target_log_kernel, vals_bound, bounds_type, lower_bounds, upper_bounds] (const arma::vec& vals_inp, arma::vec* grad_out, void* target_data) \
+    -> double 
+    {
         //
         if (vals_bound) {
             arma::vec vals_inv_trans = inv_transform(vals_inp, bounds_type, lower_bounds, upper_bounds);
@@ -67,7 +71,10 @@ mcmc::mala_int(const arma::vec& initial_vals, arma::mat& draws_out, std::functio
         }
     };
 
-    std::function<arma::vec (const arma::vec& vals_inp, void* target_data, const double step_size, arma::mat* jacob_matrix_out)> mala_mean_fn = [target_log_kernel, vals_bound, bounds_type, lower_bounds, upper_bounds, precond_matrix] (const arma::vec& vals_inp, void* target_data, const double step_size, arma::mat* jacob_matrix_out) -> arma::vec {
+    std::function<arma::vec (const arma::vec& vals_inp, void* target_data, const double step_size, arma::mat* jacob_matrix_out)> mala_mean_fn \
+    = [target_log_kernel, vals_bound, bounds_type, lower_bounds, upper_bounds, precond_matrix] (const arma::vec& vals_inp, void* target_data, const double step_size, arma::mat* jacob_matrix_out) \
+    -> arma::vec
+    {
 
         const int n_vals = vals_inp.n_elem;
         arma::vec grad_obj(n_vals);
@@ -122,9 +129,16 @@ mcmc::mala_int(const arma::vec& initial_vals, arma::mat& draws_out, std::functio
     int n_accept = 0;    
     arma::vec krand(n_vals);
     
-    for (int jj = 0; jj < n_draws_keep + n_draws_burnin; jj++) {
+    for (int jj = 0; jj < n_draws_keep + n_draws_burnin; jj++)
+    {
+        if (vals_bound) {
+            arma::mat jacob_matrix;
+            arma::vec mean_vec = mala_mean_fn(prev_draw, target_data, step_size, &jacob_matrix);
 
-        new_draw = mala_mean_fn(prev_draw, target_data, step_size, nullptr) + step_size * sqrt_precond_matrix * krand.randn();
+            new_draw = mean_vec + step_size * jacob_matrix * sqrt_precond_matrix * krand.randn();
+        } else {
+            new_draw = mala_mean_fn(prev_draw, target_data, step_size, nullptr) + step_size * sqrt_precond_matrix * krand.randn();
+        }
         
         prop_LP = box_log_kernel(new_draw, nullptr, target_data);
         
@@ -137,16 +151,21 @@ mcmc::mala_int(const arma::vec& initial_vals, arma::mat& draws_out, std::functio
         double comp_val = std::min(0.0, prop_LP - prev_LP + mala_prop_adjustment(new_draw, prev_draw, step_size, vals_bound, precond_matrix, mala_mean_fn, target_data));
         double z = arma::as_scalar(arma::randu(1));
 
-        if (z < std::exp(comp_val)) {
+        if (z < std::exp(comp_val)) 
+        {
             prev_draw = new_draw;
             prev_LP = prop_LP;
 
-            if (jj >= n_draws_burnin) {
+            if (jj >= n_draws_burnin) 
+            {
                 draws_out.row(jj - n_draws_burnin) = new_draw.t();
                 n_accept++;
             }
-        } else {
-            if (jj >= n_draws_burnin) {
+        } 
+        else 
+        {
+            if (jj >= n_draws_burnin) 
+            {
                 draws_out.row(jj - n_draws_burnin) = prev_draw.t();
             }
         }

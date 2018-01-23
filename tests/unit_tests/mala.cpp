@@ -92,11 +92,9 @@ int main()
     std::cout << "mala: mcmc mean = " << arma::mean(draws_out) << std::endl;
 
     //
-    //
+    // test bounds
 
-    arma::vec lb(2);
-    lb(0) = 0.0;
-    lb(1) = 0.0;
+    arma::vec lb = arma::zeros(2,1);
 
     arma::vec ub(2);
     ub(0) = 4.0;
