@@ -134,8 +134,8 @@ mcmc::mala_int(const arma::vec& initial_vals, arma::mat& draws_out, std::functio
         if (vals_bound) {
             arma::mat jacob_matrix;
             arma::vec mean_vec = mala_mean_fn(prev_draw, target_data, step_size, &jacob_matrix);
-
-            new_draw = mean_vec + step_size * jacob_matrix * sqrt_precond_matrix * krand.randn();
+            
+            new_draw = mean_vec + step_size * arma::chol(jacob_matrix,"lower") * sqrt_precond_matrix * krand.randn();
         } else {
             new_draw = mala_mean_fn(prev_draw, target_data, step_size, nullptr) + step_size * sqrt_precond_matrix * krand.randn();
         }
