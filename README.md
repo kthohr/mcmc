@@ -6,13 +6,14 @@ Features:
 
 * Parallelized C++11 implementations of several well-known MCMC methods, including:
     - Random Walk Metropolis-Hastings (RWMH);
+    - Metropolis-adjusted Langevin algorithm (MALA);
     - Hamiltonian Monte Carlo (HMC); and
-    - Metropolis-adjusted Langevin algorithm (MALA).
+    - Riemannian Manifold HMC.
 
-* Support for multi-modal distributions with 
+* Samplers designed for multi-modal distributions:
     - Equi-Energy sampling; and
     - Differential Evolution (DE).
-* Built on the Armadillo C++ linear algebra library for fast and efficient matrix-based computation.
+* Built on the [Armadillo C++ linear algebra library](http://arma.sourceforge.net/) for fast and efficient matrix-based computation.
 
 ## Status
 
@@ -20,11 +21,12 @@ The library is actively maintained, and is still being extended.
 
 Algorithms:
 
-* RWMH
-* MALA
-* HMC
-* AEES
-* DE
+* `rwmh`
+* `mala`
+* `hmc`
+* `rmhmc`
+* `aees`
+* `de`
 
 ## Syntax
 
@@ -60,9 +62,9 @@ make install
 The last line will install MCMCLib into `/usr/local`.
 
 There are several configure options available:
-* `-c` a coverage build
+* `-c` a coverage build (used with Codecov)
 * `-d` 'development' build with install names set to the build directory (as opposed to an install path)
-* `-g` a debugging build
+* `-g` a debugging build (optimization flags set to: `-O0 -g`)
 * `-m` specify the BLAS and Lapack libraries to link against; for example, `-m "-lopenblas"` or `-m "-framework Accelerate"`
 * `-o` compiler optimization options; defaults to `-O3 -march=native -ffp-contract=fast -flto -DARMA_NO_DEBUG`
 * `-p` enable parallelization features (using OpenMP)

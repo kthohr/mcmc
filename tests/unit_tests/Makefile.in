@@ -13,8 +13,6 @@ ARMA_INCLUDE_PATH = @ARMA_INCLUDE_PATH@
 INSTALL_PATH=@MCMC_INSTALL_PATH@
 
 # source directories
-SDIR = ./..
-MCMC_DIR = $(SDIR)
 MCMC_HEADER_DIR = @MCMC_INCLUDE_PATH@
 MCMC_TEST_DIR = .
 
@@ -22,13 +20,13 @@ MCMC_TEST_DIR = .
 CXXFLAGS = $(CXX_STD) $(OPT_FLAGS) -I$(ARMA_INCLUDE_PATH) -I$(MCMC_HEADER_DIR)
 LIBS= -L@MCMC_INSTALL_PATH@ -l@MCMC_SHLIB_NAME@ @MCMC_BLAS_LAPACK@
 
-# TraME Test Files
-SOURCES_MCMC= $(MCMC_TEST_DIR)/aees.cpp $(MCMC_TEST_DIR)/de.cpp $(MCMC_TEST_DIR)/determine_bounds_type.cpp $(MCMC_TEST_DIR)/hmc.cpp $(MCMC_TEST_DIR)/log_jacobian.cpp $(MCMC_TEST_DIR)/mala.cpp $(MCMC_TEST_DIR)/rwmh.cpp $(MCMC_TEST_DIR)/transform_vals.cpp
-OBJECTS_MCMC= $(SOURCES_MCMC:.cpp=.test)
+# MCMC Test Files
+SOURCES_MCMC := $(shell find $(MCMC_TEST_DIR) -name '*.cpp')
+OBJECTS_MCMC := $(addprefix $(MCMC_TEST_DIR)/,$(SOURCES_MCMC:%.cpp=%.test))
 
 all: $(OBJECTS_MCMC)
 
-# core TraME files
+# core MCMC files
 $(MCMC_TEST_DIR)/%.test: $(MCMC_TEST_DIR)/%.cpp
 	$(CXX) $(CXXFLAGS) $< -o $@ $(LIBS)
 

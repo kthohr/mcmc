@@ -20,7 +20,7 @@
  * Hamiltonian Monte Carlo (HMC)
  */
 
-#include "mcmc.hpp" 
+#include "mcmc.hpp"
 
 bool
 mcmc::hmc_int(const arma::vec& initial_vals, arma::mat& draws_out, std::function<double (const arma::vec& vals_inp, arma::vec* grad_out, void* target_data)> target_log_kernel, void* target_data, algo_settings* settings_inp)
@@ -59,8 +59,10 @@ mcmc::hmc_int(const arma::vec& initial_vals, arma::mat& draws_out, std::function
     //
     // lambda function for box constraints
 
-    std::function<double (const arma::vec& vals_inp, arma::vec* grad_out, void* box_data)> box_log_kernel = [target_log_kernel, vals_bound, bounds_type, lower_bounds, upper_bounds] (const arma::vec& vals_inp, arma::vec* grad_out, void* target_data) -> double {
-        //
+    std::function<double (const arma::vec& vals_inp, arma::vec* grad_out, void* box_data)> box_log_kernel \
+    = [target_log_kernel, vals_bound, bounds_type, lower_bounds, upper_bounds] (const arma::vec& vals_inp, arma::vec* grad_out, void* target_data) \
+    -> double 
+    {
         if (vals_bound) {
             arma::vec vals_inv_trans = inv_transform(vals_inp, bounds_type, lower_bounds, upper_bounds);
 
@@ -71,8 +73,10 @@ mcmc::hmc_int(const arma::vec& initial_vals, arma::mat& draws_out, std::function
     };
 
     // momentum update
-    std::function<arma::vec (const arma::vec& pos_inp, const arma::vec& mntm_inp, void* target_data, const double step_size, arma::mat* jacob_matrix_out)> mntm_update_fn = [target_log_kernel, vals_bound, bounds_type, lower_bounds, upper_bounds] (const arma::vec& pos_inp, const arma::vec& mntm_inp, void* target_data, const double step_size, arma::mat* jacob_matrix_out) -> arma::vec {
-
+    std::function<arma::vec (const arma::vec& pos_inp, const arma::vec& mntm_inp, void* target_data, const double step_size, arma::mat* jacob_matrix_out)> mntm_update_fn \
+    = [target_log_kernel, vals_bound, bounds_type, lower_bounds, upper_bounds] (const arma::vec& pos_inp, const arma::vec& mntm_inp, void* target_data, const double step_size, arma::mat* jacob_matrix_out) \
+    -> arma::vec 
+    {
         const int n_vals = pos_inp.n_elem;
         arma::vec grad_obj(n_vals);
 
@@ -92,15 +96,11 @@ mcmc::hmc_int(const arma::vec& initial_vals, arma::mat& draws_out, std::function
 
             //
 
-            arma::vec mntm_out = mntm_inp + step_size * jacob_matrix * grad_obj / 2.0;
-
-            return mntm_out;
+            return mntm_inp + step_size * jacob_matrix * grad_obj / 2.0;
         } else {
             target_log_kernel(pos_inp,&grad_obj,target_data);
 
-            arma::vec mntm_out = mntm_inp + step_size * grad_obj / 2.0;
-
-            return mntm_out;
+            return mntm_inp + step_size * grad_obj / 2.0;
         }
     };
 
@@ -136,7 +136,8 @@ mcmc::hmc_int(const arma::vec& initial_vals, arma::mat& draws_out, std::function
 
         new_draw = prev_draw;
 
-        for (int k = 0; k < n_leap_steps; k++) {
+        for (int k = 0; k < n_leap_steps; k++)
+        {   // begin leap frog steps
             
             new_mntm = mntm_update_fn(new_draw,new_mntm,target_data,step_size,nullptr); // half-step
 

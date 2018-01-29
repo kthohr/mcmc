@@ -61,6 +61,9 @@ struct algo_settings {
 
     double hmc_accept_rate; // will be returned by the function
 
+    // RM-HMC: HMC options + below
+    int rmhmc_fp_steps = 5; // number of fixed point iteration steps
+
     // MALA
     int mala_n_draws = 1E04;
     int mala_n_burnin = 1E04;
