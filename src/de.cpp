@@ -117,7 +117,7 @@ mcmc::de_int(const arma::vec& initial_vals, arma::cube& draws_out, std::function
 #endif
             for (size_t i=0; i < n_pop; i++) {
 
-                int R_1, R_2;
+                size_t R_1, R_2;
 
                 do {
                     R_1 = arma::as_scalar(arma::randi(1, arma::distr_param(0, n_pop-1)));
