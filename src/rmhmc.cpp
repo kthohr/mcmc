@@ -56,13 +56,18 @@ mcmc::rmhmc_int(const arma::vec& initial_vals, arma::mat& draws_out, std::functi
     //
     // lambda function for box constraints
 
-    std::function<double (const arma::vec& vals_inp, arma::vec* grad_out, void* box_data)> box_log_kernel = [target_log_kernel, vals_bound, bounds_type, lower_bounds, upper_bounds] (const arma::vec& vals_inp, arma::vec* grad_out, void* target_data) -> double {
-        //
-        if (vals_bound) {
+    std::function<double (const arma::vec& vals_inp, arma::vec* grad_out, void* box_data)> box_log_kernel \
+    = [target_log_kernel, vals_bound, bounds_type, lower_bounds, upper_bounds] (const arma::vec& vals_inp, arma::vec* grad_out, void* target_data) \
+    -> double
+    {
+        if (vals_bound)
+        {
             arma::vec vals_inv_trans = inv_transform(vals_inp, bounds_type, lower_bounds, upper_bounds);
 
             return target_log_kernel(vals_inv_trans, nullptr, target_data) + log_jacobian(vals_inp, bounds_type, lower_bounds, upper_bounds);
-        } else {
+        }
+        else
+        {
             return target_log_kernel(vals_inp, nullptr, target_data);
         }
     };
@@ -83,7 +88,8 @@ mcmc::rmhmc_int(const arma::vec& initial_vals, arma::mat& draws_out, std::functi
 
             //
 
-            for (int i=0; i < n_vals; i++) {
+            for (size_t i=0; i < n_vals; i++) 
+            {
                 arma::mat tmp_mat = inv_tensor_mat * tensor_deriv.slice(i);
 
                 grad_obj(i) = - grad_obj(i) + 0.5*( arma::trace(tmp_mat) - arma::as_scalar(mntm_inp.t() * tmp_mat * inv_tensor_mat * mntm_inp) );
@@ -107,7 +113,7 @@ mcmc::rmhmc_int(const arma::vec& initial_vals, arma::mat& draws_out, std::functi
 
             //
 
-            for (int i=0; i < n_vals; i++) {
+            for (size_t i=0; i < n_vals; i++) {
                 arma::mat tmp_mat = inv_tensor_mat * tensor_deriv.slice(i);
 
                 grad_obj(i) = - grad_obj(i) + 0.5*( arma::trace(tmp_mat) - arma::as_scalar(mntm_inp.t() * tmp_mat * inv_tensor_mat * mntm_inp) );
@@ -175,19 +181,19 @@ mcmc::rmhmc_int(const arma::vec& initial_vals, arma::mat& draws_out, std::functi
     int n_accept = 0;    
     double comp_val;
     
-    for (int jj = 0; jj < n_draws_keep + n_draws_burnin; jj++) {
-
+    for (size_t jj = 0; jj < n_draws_keep + n_draws_burnin; jj++)
+    {
         new_mntm = arma::chol(prev_tensor,"lower")*arma::randn(n_vals,1);
         prev_K = arma::dot(new_mntm,inv_prev_tensor*new_mntm) / 2.0;
 
         new_draw = prev_draw;
 
-        for (int k = 0; k < n_leap_steps; k++)
+        for (size_t k = 0; k < n_leap_steps; k++)
         {   // begin leap frog steps
 
             arma::vec prop_mntm = new_mntm;
 
-            for (int kk=0; kk < n_fp_steps; kk++) {
+            for (size_t kk=0; kk < n_fp_steps; kk++) {
                 prop_mntm = new_mntm + mntm_update_fn(new_draw,prop_mntm,target_data,step_size,inv_prev_tensor,prev_deriv_cube,nullptr); // half-step
             }
 
@@ -198,7 +204,8 @@ mcmc::rmhmc_int(const arma::vec& initial_vals, arma::mat& draws_out, std::functi
             arma::vec prop_draw = new_draw;
             // new_draw += step_size * inv_prev_tensor * new_mntm;
 
-            for (int kk=0; kk < n_fp_steps; kk++) {
+            for (size_t kk=0; kk < n_fp_steps; kk++)
+            {
                 inv_new_tensor = arma::inv(box_tensor_fn(prop_draw,nullptr,tensor_data));
 
                 prop_draw = new_draw + 0.5 * step_size * ( inv_prev_tensor + inv_new_tensor ) * new_mntm;
@@ -212,7 +219,6 @@ mcmc::rmhmc_int(const arma::vec& initial_vals, arma::mat& draws_out, std::functi
             //
 
             new_mntm += mntm_update_fn(new_draw,new_mntm,target_data,step_size,inv_new_tensor,new_deriv_cube,nullptr); // half-step
-
         }
 
         prop_U = cons_term - box_log_kernel(new_draw, nullptr, target_data) + 0.5*std::log(arma::det(new_tensor));
@@ -228,7 +234,7 @@ mcmc::rmhmc_int(const arma::vec& initial_vals, arma::mat& draws_out, std::functi
         comp_val = std::min(0.0, - (prop_U + prop_K) + (prev_U + prev_K));
         double z_rand = arma::as_scalar(arma::randu(1));
 
-        if (z_rand < std::exp(comp_val)) 
+        if (z_rand < std::exp(comp_val))
         {
             prev_draw = new_draw;
 
@@ -239,7 +245,8 @@ mcmc::rmhmc_int(const arma::vec& initial_vals, arma::mat& draws_out, std::functi
             inv_prev_tensor = inv_new_tensor;
             prev_deriv_cube = new_deriv_cube;
 
-            if (jj >= n_draws_burnin) {
+            if (jj >= n_draws_burnin)
+            {
                 draws_out.row(jj - n_draws_burnin) = new_draw.t();
                 n_accept++;
             }
@@ -260,7 +267,7 @@ mcmc::rmhmc_int(const arma::vec& initial_vals, arma::mat& draws_out, std::functi
 #ifdef MCMC_USE_OMP
         #pragma omp parallel for
 #endif
-        for (int jj = 0; jj < n_draws_keep; jj++) {
+        for (size_t jj = 0; jj < n_draws_keep; jj++) {
             draws_out.row(jj) = arma::trans(inv_transform(draws_out.row(jj).t(), bounds_type, lower_bounds, upper_bounds));
         }
     }

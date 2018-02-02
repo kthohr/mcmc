@@ -61,12 +61,14 @@ mcmc::mala_int(const arma::vec& initial_vals, arma::mat& draws_out, std::functio
     = [target_log_kernel, vals_bound, bounds_type, lower_bounds, upper_bounds] (const arma::vec& vals_inp, arma::vec* grad_out, void* target_data) \
     -> double 
     {
-        //
-        if (vals_bound) {
+        if (vals_bound)
+        {
             arma::vec vals_inv_trans = inv_transform(vals_inp, bounds_type, lower_bounds, upper_bounds);
 
             return target_log_kernel(vals_inv_trans, nullptr, target_data) + log_jacobian(vals_inp, bounds_type, lower_bounds, upper_bounds);
-        } else {
+        }
+        else
+        {
             return target_log_kernel(vals_inp, nullptr, target_data);
         }
     };
@@ -79,8 +81,8 @@ mcmc::mala_int(const arma::vec& initial_vals, arma::mat& draws_out, std::functio
         const int n_vals = vals_inp.n_elem;
         arma::vec grad_obj(n_vals);
 
-        if (vals_bound) {
-
+        if (vals_bound)
+        {
             arma::vec vals_inv_trans = inv_transform(vals_inp, bounds_type, lower_bounds, upper_bounds);
 
             target_log_kernel(vals_inv_trans,&grad_obj,target_data);
@@ -95,15 +97,13 @@ mcmc::mala_int(const arma::vec& initial_vals, arma::mat& draws_out, std::functio
 
             //
 
-            arma::vec prop_vals_out = vals_inp + step_size * step_size * jacob_matrix * precond_matrix * grad_obj / 2.0;
-
-            return prop_vals_out;
-        } else {
+            return vals_inp + step_size * step_size * jacob_matrix * precond_matrix * grad_obj / 2.0;
+        }
+        else
+        {
             target_log_kernel(vals_inp,&grad_obj,target_data);
 
-            arma::vec prop_vals_out = vals_inp + step_size * step_size * precond_matrix * grad_obj / 2.0;
-
-            return prop_vals_out;
+            return vals_inp + step_size * step_size * precond_matrix * grad_obj / 2.0;
         }
     };
 
@@ -129,14 +129,17 @@ mcmc::mala_int(const arma::vec& initial_vals, arma::mat& draws_out, std::functio
     int n_accept = 0;    
     arma::vec krand(n_vals);
     
-    for (int jj = 0; jj < n_draws_keep + n_draws_burnin; jj++)
+    for (size_t jj = 0; jj < n_draws_keep + n_draws_burnin; jj++)
     {
-        if (vals_bound) {
+        if (vals_bound) 
+        {
             arma::mat jacob_matrix;
             arma::vec mean_vec = mala_mean_fn(prev_draw, target_data, step_size, &jacob_matrix);
             
             new_draw = mean_vec + step_size * arma::chol(jacob_matrix,"lower") * sqrt_precond_matrix * krand.randn();
-        } else {
+        }
+        else
+        {
             new_draw = mala_mean_fn(prev_draw, target_data, step_size, nullptr) + step_size * sqrt_precond_matrix * krand.randn();
         }
         
@@ -179,7 +182,7 @@ mcmc::mala_int(const arma::vec& initial_vals, arma::mat& draws_out, std::functio
 #ifdef MCMC_USE_OMP
         #pragma omp parallel for
 #endif
-        for (int jj = 0; jj < n_draws_keep; jj++) {
+        for (size_t jj = 0; jj < n_draws_keep; jj++) {
             draws_out.row(jj) = arma::trans(inv_transform(draws_out.row(jj).t(), bounds_type, lower_bounds, upper_bounds));
         }
     }

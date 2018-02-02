@@ -79,7 +79,7 @@ mcmc::de_int(const arma::vec& initial_vals, arma::cube& draws_out, std::function
 #ifdef MCMC_USE_OMP
     #pragma omp parallel for
 #endif
-    for (int i=0; i < n_pop; i++) {
+    for (size_t i=0; i < n_pop; i++) {
         X.row(i) = par_initial_lb.t() + (par_initial_ub.t() - par_initial_lb.t())%arma::randu(1,n_vals);
 
         double prop_kernel_val = box_log_kernel(X.row(i).t(),target_data);
@@ -99,7 +99,7 @@ mcmc::de_int(const arma::vec& initial_vals, arma::cube& draws_out, std::function
     int n_accept = 0;
     double par_gamma_run = par_gamma;
     
-    for (int j=0; j < n_gen + n_burnin; j++) {
+    for (size_t j=0; j < n_gen + n_burnin; j++) {
         double temperature_j = de_cooling_schedule(j,n_gen);
         
         if (jumps && ((j+1) % 10 == 0)) {
@@ -109,7 +109,7 @@ mcmc::de_int(const arma::vec& initial_vals, arma::cube& draws_out, std::function
 #ifdef MCMC_USE_OMP
         #pragma omp parallel for
 #endif
-            for (int i=0; i < n_pop; i++) {
+            for (size_t i=0; i < n_pop; i++) {
 
                 int R_1, R_2;
 
@@ -148,11 +148,13 @@ mcmc::de_int(const arma::vec& initial_vals, arma::cube& draws_out, std::function
                     }
                 }
             }
+        
         //
-        if(j >= n_burnin){
+
+        if (j >= n_burnin) {
             draws_out.slice(j-n_burnin) = X;
         }
-        //
+        
         if (jumps && ((j+1) % 10 == 0)) {
             par_gamma_run = par_gamma;
         }
@@ -166,8 +168,8 @@ mcmc::de_int(const arma::vec& initial_vals, arma::cube& draws_out, std::function
 #ifdef MCMC_USE_OMP
         #pragma omp parallel for
 #endif
-        for (int ii = 0; ii < n_gen; ii++) {
-            for (int jj = 0; jj < n_pop; jj++) {
+        for (size_t ii = 0; ii < n_gen; ii++) {
+            for (size_t jj = 0; jj < n_pop; jj++) {
                 draws_out.slice(ii).row(jj) = arma::trans(inv_transform(draws_out.slice(ii).row(jj).t(), bounds_type, lower_bounds, upper_bounds));
             }
         }

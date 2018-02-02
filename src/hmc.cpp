@@ -63,11 +63,14 @@ mcmc::hmc_int(const arma::vec& initial_vals, arma::mat& draws_out, std::function
     = [target_log_kernel, vals_bound, bounds_type, lower_bounds, upper_bounds] (const arma::vec& vals_inp, arma::vec* grad_out, void* target_data) \
     -> double 
     {
-        if (vals_bound) {
+        if (vals_bound) 
+        {
             arma::vec vals_inv_trans = inv_transform(vals_inp, bounds_type, lower_bounds, upper_bounds);
 
             return target_log_kernel(vals_inv_trans, nullptr, target_data) + log_jacobian(vals_inp, bounds_type, lower_bounds, upper_bounds);
-        } else {
+        } 
+        else 
+        {
             return target_log_kernel(vals_inp, nullptr, target_data);
         }
     };
@@ -80,8 +83,8 @@ mcmc::hmc_int(const arma::vec& initial_vals, arma::mat& draws_out, std::function
         const int n_vals = pos_inp.n_elem;
         arma::vec grad_obj(n_vals);
 
-        if (vals_bound) {
-
+        if (vals_bound) 
+        {
             arma::vec pos_inv_trans = inv_transform(pos_inp, bounds_type, lower_bounds, upper_bounds);
 
             target_log_kernel(pos_inv_trans,&grad_obj,target_data);
@@ -97,7 +100,9 @@ mcmc::hmc_int(const arma::vec& initial_vals, arma::mat& draws_out, std::function
             //
 
             return mntm_inp + step_size * jacob_matrix * grad_obj / 2.0;
-        } else {
+        } 
+        else 
+        {
             target_log_kernel(pos_inp,&grad_obj,target_data);
 
             return mntm_inp + step_size * grad_obj / 2.0;
@@ -129,14 +134,14 @@ mcmc::hmc_int(const arma::vec& initial_vals, arma::mat& draws_out, std::function
 
     int n_accept = 0;
     
-    for (int jj = 0; jj < n_draws_keep + n_draws_burnin; jj++) {
-
+    for (size_t jj = 0; jj < n_draws_keep + n_draws_burnin; jj++) 
+    {
         new_mntm = sqrt_precond_matrix*arma::randn(n_vals,1);
         prev_K = arma::dot(new_mntm,inv_precond_matrix*new_mntm) / 2.0;
 
         new_draw = prev_draw;
 
-        for (int k = 0; k < n_leap_steps; k++)
+        for (size_t k = 0; k < n_leap_steps; k++)
         {   // begin leap frog steps
             
             new_mntm = mntm_update_fn(new_draw,new_mntm,target_data,step_size,nullptr); // half-step
@@ -163,7 +168,8 @@ mcmc::hmc_int(const arma::vec& initial_vals, arma::mat& draws_out, std::function
         double comp_val = std::min(0.0,- prop_U - prop_K + prev_U + prev_K);
         double z = arma::as_scalar(arma::randu(1));
 
-        if (z < std::exp(comp_val)) {
+        if (z < std::exp(comp_val)) 
+        {
             prev_draw = new_draw;
             prev_U = prop_U;
             prev_K = prop_K;
@@ -172,7 +178,9 @@ mcmc::hmc_int(const arma::vec& initial_vals, arma::mat& draws_out, std::function
                 draws_out.row(jj - n_draws_burnin) = new_draw.t();
                 n_accept++;
             }
-        } else {
+        } 
+        else 
+        {
             if (jj >= n_draws_burnin) {
                 draws_out.row(jj - n_draws_burnin) = prev_draw.t();
             }
@@ -187,7 +195,7 @@ mcmc::hmc_int(const arma::vec& initial_vals, arma::mat& draws_out, std::function
 #ifdef MCMC_USE_OMP
         #pragma omp parallel for
 #endif
-        for (int jj = 0; jj < n_draws_keep; jj++) {
+        for (size_t jj = 0; jj < n_draws_keep; jj++) {
             draws_out.row(jj) = arma::trans(inv_transform(draws_out.row(jj).t(), bounds_type, lower_bounds, upper_bounds));
         }
     }

@@ -77,13 +77,18 @@ mcmc::aees_int(const arma::vec& initial_vals, arma::mat& draws_out, std::functio
 
     // lambda function for box constraints
 
-    std::function<double (const arma::vec& vals_inp, void* target_data)> box_log_kernel = [target_log_kernel, vals_bound, bounds_type, lower_bounds, upper_bounds] (const arma::vec& vals_inp, void* target_data) -> double {
-        //
-        if (vals_bound) {
+    std::function<double (const arma::vec& vals_inp, void* target_data)> box_log_kernel \
+    = [target_log_kernel, vals_bound, bounds_type, lower_bounds, upper_bounds] (const arma::vec& vals_inp, void* target_data) \
+    -> double 
+    {
+        if (vals_bound) 
+        {
             arma::vec vals_inv_trans = inv_transform(vals_inp, bounds_type, lower_bounds, upper_bounds);
 
             return target_log_kernel(vals_inv_trans, target_data) + log_jacobian(vals_inp, bounds_type, lower_bounds, upper_bounds);
-        } else {
+        } 
+        else 
+        {
             return target_log_kernel(vals_inp, target_data);
         }
     };
@@ -112,7 +117,7 @@ mcmc::aees_int(const arma::vec& initial_vals, arma::mat& draws_out, std::functio
 
     double val_out; // holds kernel value
 
-    for (int n=0; n < (total_draws); n++) {
+    for (size_t n=0; n < total_draws; n++) {
     
         arma::mat X_prev = X_new;
         kernel_vals_prev = kernel_vals_new;
@@ -123,27 +128,32 @@ mcmc::aees_int(const arma::vec& initial_vals, arma::mat& draws_out, std::functio
         
         // loop down temperature vector
 
-        for (int j=1; j < K; j++) {
-            if (n > j*(n_initial_draws + n_burnin)) {
-                
+        for (size_t j=1; j < K; j++) 
+        {
+            if (n > j*(n_initial_draws + n_burnin)) 
+            {    
                 double z_eps = arma::as_scalar(arma::randu(1,1));
 
-                if (z_eps > ee_prob_par) {
+                if (z_eps > ee_prob_par) 
+                {
                     X_new.col(j) = single_step_mh(X_prev.col(j), temper_vec(j), sqrt_cov_mcmc, box_log_kernel, target_data, &val_out);
 
                     kernel_vals_new(0,j) = val_out / temper_vec(j-1);
                     kernel_vals_new(1,j) = val_out / temper_vec(j);
-                } else {
-
+                }
+                else
+                {
                     int initial_j = (j-1)*(n_initial_draws + n_burnin);
-
+                    
                     int ring_ind_spacing = std::floor( (n - initial_j + 1) / n_rings);
                     
-                    if (ring_ind_spacing == 0) {
+                    if (ring_ind_spacing == 0) 
+                    {
                         X_new.col(j) = X_prev.col(j);
                         kernel_vals_new.col(j) = kernel_vals_prev.col(j);
-                    } else {
-
+                    }
+                    else
+                    {
                         arma::vec past_kernel_vals = arma::trans(kernel_vals(arma::span(j-1,j-1),arma::span(initial_j,n)));
 
                         arma::uvec sort_ind = arma::sort_index(past_kernel_vals);
@@ -151,7 +161,7 @@ mcmc::aees_int(const arma::vec& initial_vals, arma::mat& draws_out, std::functio
 
                         // construct rings
 
-                        for (int i=0; i < (n_rings-1); i++) {
+                        for (size_t i=0; i < (n_rings-1); i++) {
                             ring_vals(j-1,i) = (past_kernel_vals((i+1)*ring_ind_spacing) + past_kernel_vals((i+1)*ring_ind_spacing-1)) / 2.0;
                         }
                         
@@ -183,7 +193,8 @@ mcmc::aees_int(const arma::vec& initial_vals, arma::mat& draws_out, std::functio
                         double comp_val = std::min(0.0, comp_val_1 + comp_val_2);
                         double z = arma::as_scalar(arma::randu(1,1));
 
-                        if (z > std::exp(comp_val)) {
+                        if (z > std::exp(comp_val)) 
+                        {
                             X_new.col(j) = X_prev.col(j);
                             kernel_vals_new.col(j) = kernel_vals_prev.col(j);
                         }
@@ -203,7 +214,8 @@ mcmc::aees_int(const arma::vec& initial_vals, arma::mat& draws_out, std::functio
 
     draws_out.set_size(total_draws,n_vals);
 
-    for (int i=0; i < total_draws; i++) {
+    for (size_t i=0; i < total_draws; i++) 
+    {
         arma::vec tmp_vec = X_out(arma::span(),arma::span(K-1,K-1),arma::span(i,i));
 
         if (vals_bound) {

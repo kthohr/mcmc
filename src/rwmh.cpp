@@ -55,13 +55,18 @@ mcmc::rwmh_int(const arma::vec& initial_vals, arma::mat& draws_out, std::functio
 
     // lambda function for box constraints
 
-    std::function<double (const arma::vec& vals_inp, void* box_data)> box_log_kernel = [target_log_kernel, vals_bound, bounds_type, lower_bounds, upper_bounds] (const arma::vec& vals_inp, void* target_data) -> double {
-        //
-        if (vals_bound) {
+    std::function<double (const arma::vec& vals_inp, void* box_data)> box_log_kernel \
+    = [target_log_kernel, vals_bound, bounds_type, lower_bounds, upper_bounds] (const arma::vec& vals_inp, void* target_data) \
+    -> double 
+    {
+        if (vals_bound)
+        {
             arma::vec vals_inv_trans = inv_transform(vals_inp, bounds_type, lower_bounds, upper_bounds);
 
             return target_log_kernel(vals_inv_trans, target_data) + log_jacobian(vals_inp, bounds_type, lower_bounds, upper_bounds);
-        } else {
+        }
+        else
+        {
             return target_log_kernel(vals_inp, target_data);
         }
     };
@@ -91,7 +96,8 @@ mcmc::rwmh_int(const arma::vec& initial_vals, arma::mat& draws_out, std::functio
     int n_accept = 0;
     arma::vec krand(n_vals);
     
-    for (int jj = 0; jj < n_draws_keep + n_draws_burnin; jj++) {
+    for (size_t jj = 0; jj < n_draws_keep + n_draws_burnin; jj++)
+    {
 
         new_draw = prev_draw + cov_mcmc_chol * krand.randn();
         
@@ -106,15 +112,19 @@ mcmc::rwmh_int(const arma::vec& initial_vals, arma::mat& draws_out, std::functio
         double comp_val = std::min(0.0,prop_LP - prev_LP);
         double z = arma::as_scalar(arma::randu(1));
 
-        if (z < std::exp(comp_val)) {
+        if (z < std::exp(comp_val))
+        {
             prev_draw = new_draw;
             prev_LP = prop_LP;
 
-            if (jj >= n_draws_burnin) {
+            if (jj >= n_draws_burnin)
+            {
                 draws_out.row(jj - n_draws_burnin) = new_draw.t();
                 n_accept++;
             }
-        } else {
+        }
+        else
+        {
             if (jj >= n_draws_burnin) {
                 draws_out.row(jj - n_draws_burnin) = prev_draw.t();
             }
@@ -129,7 +139,7 @@ mcmc::rwmh_int(const arma::vec& initial_vals, arma::mat& draws_out, std::functio
 #ifdef MCMC_USE_OMP
         #pragma omp parallel for
 #endif
-        for (int jj = 0; jj < n_draws_keep; jj++) {
+        for (size_t jj = 0; jj < n_draws_keep; jj++) {
             draws_out.row(jj) = arma::trans(inv_transform(draws_out.row(jj).t(), bounds_type, lower_bounds, upper_bounds));
         }
     }
