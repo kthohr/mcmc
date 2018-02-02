@@ -28,7 +28,7 @@ mcmc::hmc_int(const arma::vec& initial_vals, arma::mat& draws_out, std::function
     bool success = false;
 
     const double BIG_NEG_VAL = MCMC_BIG_NEG_VAL;
-    const int n_vals = initial_vals.n_elem;
+    const size_t n_vals = initial_vals.n_elem;
 
     //
     // HMC settings
@@ -39,11 +39,11 @@ mcmc::hmc_int(const arma::vec& initial_vals, arma::mat& draws_out, std::function
         settings = *settings_inp;
     }
 
-    const int n_draws_keep   = settings.hmc_n_draws;
-    const int n_draws_burnin = settings.hmc_n_burnin;
+    const size_t n_draws_keep   = settings.hmc_n_draws;
+    const size_t n_draws_burnin = settings.hmc_n_burnin;
 
     const double step_size = settings.hmc_step_size;
-    const int n_leap_steps = settings.hmc_leap_steps;
+    const size_t n_leap_steps = settings.hmc_leap_steps;
 
     const arma::mat precond_matrix = (settings.hmc_precond_mat.n_elem == n_vals*n_vals) ? settings.hmc_precond_mat : arma::eye(n_vals,n_vals);
     const arma::mat inv_precond_matrix = arma::inv(precond_matrix);
@@ -80,7 +80,7 @@ mcmc::hmc_int(const arma::vec& initial_vals, arma::mat& draws_out, std::function
     = [target_log_kernel, vals_bound, bounds_type, lower_bounds, upper_bounds] (const arma::vec& pos_inp, const arma::vec& mntm_inp, void* target_data, const double step_size, arma::mat* jacob_matrix_out) \
     -> arma::vec 
     {
-        const int n_vals = pos_inp.n_elem;
+        const size_t n_vals = pos_inp.n_elem;
         arma::vec grad_obj(n_vals);
 
         if (vals_bound) 

@@ -28,7 +28,7 @@ mcmc::mala_int(const arma::vec& initial_vals, arma::mat& draws_out, std::functio
     bool success = false;
 
     const double BIG_NEG_VAL = MCMC_BIG_NEG_VAL;
-    const int n_vals = initial_vals.n_elem;
+    const size_t n_vals = initial_vals.n_elem;
 
     //
     // MALA settings
@@ -39,8 +39,8 @@ mcmc::mala_int(const arma::vec& initial_vals, arma::mat& draws_out, std::functio
         settings = *settings_inp;
     }
 
-    const int n_draws_keep   = settings.mala_n_draws;
-    const int n_draws_burnin = settings.mala_n_burnin;
+    const size_t n_draws_keep   = settings.mala_n_draws;
+    const size_t n_draws_burnin = settings.mala_n_burnin;
 
     const double step_size = settings.mala_step_size;
 
@@ -77,8 +77,7 @@ mcmc::mala_int(const arma::vec& initial_vals, arma::mat& draws_out, std::functio
     = [target_log_kernel, vals_bound, bounds_type, lower_bounds, upper_bounds, precond_matrix] (const arma::vec& vals_inp, void* target_data, const double step_size, arma::mat* jacob_matrix_out) \
     -> arma::vec
     {
-
-        const int n_vals = vals_inp.n_elem;
+        const size_t n_vals = vals_inp.n_elem;
         arma::vec grad_obj(n_vals);
 
         if (vals_bound)

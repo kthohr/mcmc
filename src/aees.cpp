@@ -28,7 +28,7 @@ mcmc::aees_int(const arma::vec& initial_vals, arma::mat& draws_out, std::functio
     bool success = false;
 
     // const double BIG_NEG_VAL = MCMC_BIG_NEG_VAL;
-    const int n_vals = initial_vals.n_elem;
+    const size_t n_vals = initial_vals.n_elem;
 
     //
     // AEES settings
@@ -39,16 +39,16 @@ mcmc::aees_int(const arma::vec& initial_vals, arma::mat& draws_out, std::functio
         settings = *settings_inp;
     }
 
-    const int n_draws         = settings.aees_n_draws;
-    const int n_initial_draws = settings.aees_n_initial_draws;
-    const int n_burnin        = settings.aees_n_burnin;
+    const size_t n_draws         = settings.aees_n_draws;
+    const size_t n_initial_draws = settings.aees_n_initial_draws;
+    const size_t n_burnin        = settings.aees_n_burnin;
 
     const double ee_prob_par = settings.aees_prob_par;
 
     // temperature vector: add T = 1 and sort
 
     arma::vec temper_vec = settings.aees_temper_vec;
-    const int K = temper_vec.n_elem + 1;
+    const size_t K = temper_vec.n_elem + 1;
     
     temper_vec.resize(K);
     temper_vec(K-1) = 1.0;
@@ -57,9 +57,9 @@ mcmc::aees_int(const arma::vec& initial_vals, arma::mat& draws_out, std::functio
 
     //
 
-    const int n_rings = settings.aees_n_rings;
+    const size_t n_rings = settings.aees_n_rings;
 
-    const int total_draws = n_draws + K*(n_initial_draws + n_burnin);
+    const size_t total_draws = n_draws + K*(n_initial_draws + n_burnin);
 
     //
 
@@ -143,9 +143,9 @@ mcmc::aees_int(const arma::vec& initial_vals, arma::mat& draws_out, std::functio
                 }
                 else
                 {
-                    int initial_j = (j-1)*(n_initial_draws + n_burnin);
+                    size_t initial_j = (j-1)*(n_initial_draws + n_burnin);
                     
-                    int ring_ind_spacing = std::floor( (n - initial_j + 1) / n_rings);
+                    size_t ring_ind_spacing = std::floor( (n - initial_j + 1) / n_rings);
                     
                     if (ring_ind_spacing == 0) 
                     {
@@ -165,7 +165,7 @@ mcmc::aees_int(const arma::vec& initial_vals, arma::mat& draws_out, std::functio
                             ring_vals(j-1,i) = (past_kernel_vals((i+1)*ring_ind_spacing) + past_kernel_vals((i+1)*ring_ind_spacing-1)) / 2.0;
                         }
                         
-                        int which_ring = 0;
+                        size_t which_ring = 0;
                         while ( which_ring < (n_rings-1) && kernel_vals(j,n-1) > ring_vals(j-1,which_ring) ) {
                             which_ring++;
                         }
@@ -174,7 +174,7 @@ mcmc::aees_int(const arma::vec& initial_vals, arma::mat& draws_out, std::functio
 
                         double z_tmp = arma::as_scalar(arma::randu());
 
-                        int ind_mix = sort_ind( static_cast<int>(ring_ind_spacing*which_ring + std::floor(z_tmp * ring_ind_spacing)) );
+                        size_t ind_mix = sort_ind( static_cast<size_t>(ring_ind_spacing*which_ring + std::floor(z_tmp * ring_ind_spacing)) );
 
                         //
 

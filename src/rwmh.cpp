@@ -28,7 +28,7 @@ mcmc::rwmh_int(const arma::vec& initial_vals, arma::mat& draws_out, std::functio
     bool success = false;
 
     const double BIG_NEG_VAL = MCMC_BIG_NEG_VAL;
-    const int n_vals = initial_vals.n_elem;
+    const size_t n_vals = initial_vals.n_elem;
 
     //
     // RWMH settings
@@ -39,8 +39,8 @@ mcmc::rwmh_int(const arma::vec& initial_vals, arma::mat& draws_out, std::functio
         settings = *settings_inp;
     }
 
-    const int n_draws_keep   = settings.rwmh_n_draws;
-    const int n_draws_burnin = settings.rwmh_n_burnin;
+    const size_t n_draws_keep   = settings.rwmh_n_draws;
+    const size_t n_draws_burnin = settings.rwmh_n_burnin;
 
     const double par_scale = settings.rwmh_par_scale;
 

@@ -28,7 +28,7 @@ mcmc::de_int(const arma::vec& initial_vals, arma::cube& draws_out, std::function
     bool success = false;
 
     const double BIG_NEG_VAL = MCMC_BIG_NEG_VAL;
-    const int n_vals = initial_vals.n_elem;
+    const size_t n_vals = initial_vals.n_elem;
     
     //
     // DE settings
@@ -39,9 +39,9 @@ mcmc::de_int(const arma::vec& initial_vals, arma::cube& draws_out, std::function
         settings = *settings_inp;
     }
 
-    const int n_pop    = settings.de_n_pop;
-    const int n_gen    = settings.de_n_gen;
-    const int n_burnin = settings.de_n_burnin;
+    const size_t n_pop    = settings.de_n_pop;
+    const size_t n_gen    = settings.de_n_gen;
+    const size_t n_burnin = settings.de_n_burnin;
 
     const bool jumps = settings.de_jumps;
     const double par_b = settings.de_par_b;
@@ -49,8 +49,8 @@ mcmc::de_int(const arma::vec& initial_vals, arma::cube& draws_out, std::function
     const double par_gamma = 2.38 / std::sqrt(2.0*n_vals);
     const double par_gamma_jump = settings.de_par_gamma_jump;
 
-    const arma::vec par_initial_lb = ((int) settings.de_initial_lb.n_elem == n_vals) ? settings.de_initial_lb : initial_vals - 0.5;
-    const arma::vec par_initial_ub = ((int) settings.de_initial_ub.n_elem == n_vals) ? settings.de_initial_ub : initial_vals + 0.5;
+    const arma::vec par_initial_lb = (settings.de_initial_lb.n_elem == n_vals) ? settings.de_initial_lb : initial_vals - 0.5;
+    const arma::vec par_initial_ub = (settings.de_initial_ub.n_elem == n_vals) ? settings.de_initial_ub : initial_vals + 0.5;
 
     const bool vals_bound = settings.vals_bound;
 
@@ -61,13 +61,18 @@ mcmc::de_int(const arma::vec& initial_vals, arma::cube& draws_out, std::function
 
     // lambda function for box constraints
 
-    std::function<double (const arma::vec& vals_inp, void* box_data)> box_log_kernel = [target_log_kernel, vals_bound, bounds_type, lower_bounds, upper_bounds] (const arma::vec& vals_inp, void* target_data) -> double {
-        //
-        if (vals_bound) {
+    std::function<double (const arma::vec& vals_inp, void* box_data)> box_log_kernel \
+    = [target_log_kernel, vals_bound, bounds_type, lower_bounds, upper_bounds] (const arma::vec& vals_inp, void* target_data) \
+    -> double
+    {
+        if (vals_bound)
+        {
             arma::vec vals_inv_trans = inv_transform(vals_inp, bounds_type, lower_bounds, upper_bounds);
 
             return target_log_kernel(vals_inv_trans, target_data) + log_jacobian(vals_inp, bounds_type, lower_bounds, upper_bounds);
-        } else {
+        } 
+        else
+        {
             return target_log_kernel(vals_inp, target_data);
         }
     };
@@ -79,7 +84,8 @@ mcmc::de_int(const arma::vec& initial_vals, arma::cube& draws_out, std::function
 #ifdef MCMC_USE_OMP
     #pragma omp parallel for
 #endif
-    for (size_t i=0; i < n_pop; i++) {
+    for (size_t i=0; i < n_pop; i++)
+    {
         X.row(i) = par_initial_lb.t() + (par_initial_ub.t() - par_initial_lb.t())%arma::randu(1,n_vals);
 
         double prop_kernel_val = box_log_kernel(X.row(i).t(),target_data);
