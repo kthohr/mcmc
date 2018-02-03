@@ -27,7 +27,6 @@ mcmc::aees_int(const arma::vec& initial_vals, arma::mat& draws_out, std::functio
 {
     bool success = false;
 
-    // const double BIG_NEG_VAL = MCMC_BIG_NEG_VAL;
     const size_t n_vals = initial_vals.n_elem;
 
     //
@@ -48,7 +47,7 @@ mcmc::aees_int(const arma::vec& initial_vals, arma::mat& draws_out, std::functio
     // temperature vector: add T = 1 and sort
 
     arma::vec temper_vec = settings.aees_temper_vec;
-    const size_t K = temper_vec.n_elem + 1;
+    const uint_t K = temper_vec.n_elem + 1;
     
     temper_vec.resize(K);
     temper_vec(K-1) = 1.0;
@@ -117,8 +116,8 @@ mcmc::aees_int(const arma::vec& initial_vals, arma::mat& draws_out, std::functio
 
     double val_out; // holds kernel value
 
-    for (size_t n=0; n < total_draws; n++) {
-    
+    for (size_t n=0; n < total_draws; n++)
+    {
         arma::mat X_prev = X_new;
         kernel_vals_prev = kernel_vals_new;
 

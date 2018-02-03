@@ -27,7 +27,6 @@ mcmc::rwmh_int(const arma::vec& initial_vals, arma::mat& draws_out, std::functio
 {
     bool success = false;
 
-    const double BIG_NEG_VAL = MCMC_BIG_NEG_VAL;
     const size_t n_vals = initial_vals.n_elem;
 
     //
@@ -104,7 +103,7 @@ mcmc::rwmh_int(const arma::vec& initial_vals, arma::mat& draws_out, std::functio
         prop_LP = box_log_kernel(new_draw, target_data);
         
         if (!std::isfinite(prop_LP)) {
-            prop_LP = BIG_NEG_VAL;
+            prop_LP = minf;
         }
 
         //

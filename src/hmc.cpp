@@ -27,7 +27,6 @@ mcmc::hmc_int(const arma::vec& initial_vals, arma::mat& draws_out, std::function
 {
     bool success = false;
 
-    const double BIG_NEG_VAL = MCMC_BIG_NEG_VAL;
     const size_t n_vals = initial_vals.n_elem;
 
     //
@@ -43,7 +42,7 @@ mcmc::hmc_int(const arma::vec& initial_vals, arma::mat& draws_out, std::function
     const size_t n_draws_burnin = settings.hmc_n_burnin;
 
     const double step_size = settings.hmc_step_size;
-    const size_t n_leap_steps = settings.hmc_leap_steps;
+    const uint_t n_leap_steps = settings.hmc_leap_steps;
 
     const arma::mat precond_matrix = (settings.hmc_precond_mat.n_elem == n_vals*n_vals) ? settings.hmc_precond_mat : arma::eye(n_vals,n_vals);
     const arma::mat inv_precond_matrix = arma::inv(precond_matrix);
@@ -141,7 +140,7 @@ mcmc::hmc_int(const arma::vec& initial_vals, arma::mat& draws_out, std::function
 
         new_draw = prev_draw;
 
-        for (size_t k = 0; k < n_leap_steps; k++)
+        for (uint_t k = 0; k < n_leap_steps; k++)
         {   // begin leap frog steps
             
             new_mntm = mntm_update_fn(new_draw,new_mntm,target_data,step_size,nullptr); // half-step
@@ -158,7 +157,7 @@ mcmc::hmc_int(const arma::vec& initial_vals, arma::mat& draws_out, std::function
         prop_U = - box_log_kernel(new_draw, nullptr, target_data);
         
         if (!std::isfinite(prop_U)) {
-            prop_U = -BIG_NEG_VAL;
+            prop_U = inf;
         }
 
         prop_K = arma::dot(new_mntm,inv_precond_matrix*new_mntm) / 2.0;

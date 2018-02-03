@@ -27,7 +27,6 @@ mcmc::de_int(const arma::vec& initial_vals, arma::cube& draws_out, std::function
 {
     bool success = false;
 
-    const double BIG_NEG_VAL = MCMC_BIG_NEG_VAL;
     const size_t n_vals = initial_vals.n_elem;
     
     //
@@ -91,7 +90,7 @@ mcmc::de_int(const arma::vec& initial_vals, arma::cube& draws_out, std::function
         double prop_kernel_val = box_log_kernel(X.row(i).t(),target_data);
 
         if (!std::isfinite(prop_kernel_val)) {
-            prop_kernel_val = BIG_NEG_VAL;
+            prop_kernel_val = minf;
         }
         
         target_vals(i) = prop_kernel_val;
@@ -105,7 +104,8 @@ mcmc::de_int(const arma::vec& initial_vals, arma::cube& draws_out, std::function
     int n_accept = 0;
     double par_gamma_run = par_gamma;
     
-    for (size_t j=0; j < n_gen + n_burnin; j++) {
+    for (size_t j=0; j < n_gen + n_burnin; j++) 
+    {
         double temperature_j = de_cooling_schedule(j,n_gen);
         
         if (jumps && ((j+1) % 10 == 0)) {
@@ -117,7 +117,7 @@ mcmc::de_int(const arma::vec& initial_vals, arma::cube& draws_out, std::function
 #endif
             for (size_t i=0; i < n_pop; i++) {
 
-                size_t R_1, R_2;
+                uint_t R_1, R_2;
 
                 do {
                     R_1 = arma::as_scalar(arma::randi(1, arma::distr_param(0, n_pop-1)));
@@ -136,7 +136,7 @@ mcmc::de_int(const arma::vec& initial_vals, arma::cube& draws_out, std::function
                 double prop_kernel_val = box_log_kernel(X_prop.t(),target_data);
                 
                 if (!std::isfinite(prop_kernel_val)) {
-                    prop_kernel_val = BIG_NEG_VAL;
+                    prop_kernel_val = minf;
                 }
                 
                 //

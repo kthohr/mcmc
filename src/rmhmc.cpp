@@ -27,7 +27,6 @@ mcmc::rmhmc_int(const arma::vec& initial_vals, arma::mat& draws_out, std::functi
 {
     bool success = false;
 
-    const double BIG_NEG_VAL = MCMC_BIG_NEG_VAL;
     const size_t n_vals = initial_vals.n_elem;
 
     //
@@ -43,8 +42,8 @@ mcmc::rmhmc_int(const arma::vec& initial_vals, arma::mat& draws_out, std::functi
     const size_t n_draws_burnin = settings.hmc_n_burnin;
 
     const double step_size = settings.hmc_step_size;
-    const size_t n_leap_steps = settings.hmc_leap_steps;
-    const size_t n_fp_steps = settings.rmhmc_fp_steps;
+    const uint_t n_leap_steps = settings.hmc_leap_steps;
+    const uint_t n_fp_steps = settings.rmhmc_fp_steps;
 
     const bool vals_bound = settings.vals_bound;
     
@@ -188,12 +187,12 @@ mcmc::rmhmc_int(const arma::vec& initial_vals, arma::mat& draws_out, std::functi
 
         new_draw = prev_draw;
 
-        for (size_t k = 0; k < n_leap_steps; k++)
+        for (uint_t k = 0; k < n_leap_steps; k++)
         {   // begin leap frog steps
 
             arma::vec prop_mntm = new_mntm;
 
-            for (size_t kk=0; kk < n_fp_steps; kk++) {
+            for (uint_t kk=0; kk < n_fp_steps; kk++) {
                 prop_mntm = new_mntm + mntm_update_fn(new_draw,prop_mntm,target_data,step_size,inv_prev_tensor,prev_deriv_cube,nullptr); // half-step
             }
 
@@ -204,7 +203,7 @@ mcmc::rmhmc_int(const arma::vec& initial_vals, arma::mat& draws_out, std::functi
             arma::vec prop_draw = new_draw;
             // new_draw += step_size * inv_prev_tensor * new_mntm;
 
-            for (size_t kk=0; kk < n_fp_steps; kk++)
+            for (uint_t kk=0; kk < n_fp_steps; kk++)
             {
                 inv_new_tensor = arma::inv(box_tensor_fn(prop_draw,nullptr,tensor_data));
 
@@ -224,7 +223,7 @@ mcmc::rmhmc_int(const arma::vec& initial_vals, arma::mat& draws_out, std::functi
         prop_U = cons_term - box_log_kernel(new_draw, nullptr, target_data) + 0.5*std::log(arma::det(new_tensor));
         
         if (!std::isfinite(prop_U)) {
-            prop_U = -BIG_NEG_VAL;
+            prop_U = inf;
         }
 
         prop_K = arma::dot(new_mntm,inv_new_tensor*new_mntm) / 2.0;

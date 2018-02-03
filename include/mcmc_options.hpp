@@ -20,6 +20,9 @@
 
 // basic settings
 
-#ifndef MCMC_BIG_NEG_VAL
-    #define MCMC_BIG_NEG_VAL -1E09;
-#endif
+namespace mcmc
+{
+    static const double inf  = std::numeric_limits<double>::infinity();
+    static const double minf = - std::numeric_limits<double>::infinity();
+    using uint_t = unsigned int;
+}
