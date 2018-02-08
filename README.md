@@ -50,8 +50,8 @@ bool rwmh(const arma::vec& initial_vals, arma::mat& draws_out, std::function<dou
 The library is installed in the usual way:
 
 ```bash
-# clone mcmc
-git clone -b master --single-branch https://github.com/kthohr/mcmc ./mcmc
+# clone mcmc into the current directory
+git clone https://github.com/kthohr/mcmc ./mcmc
 # build and install
 cd ./mcmc
 ./configure
