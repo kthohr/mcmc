@@ -93,7 +93,8 @@ if [[ "${MCMC_BUILD}" == "dev" ]]; then
     MCMC_INSTALL_PATH=${PWD}
     cd ${WDIR}
 else
-    MCMC_INSTALL_PATH="/usr/local"
+    MCMC_INCLUDE_PATH="."
+    MCMC_INSTALL_PATH="/usr/local/lib"
 fi
 
 # BLAS and LAPACK settings
