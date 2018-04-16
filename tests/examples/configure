@@ -74,7 +74,7 @@ else
 
     if [[ "${MCMC_PARALLEL}" == "y" ]]; then
         echo "MCMC: using OpenMP"
-        MCMC_OPT_FLAGS="${MCMC_OPT_FLAGS} -fopenmp -DMCMC_USE_OMP"
+        MCMC_OPT_FLAGS="${MCMC_OPT_FLAGS} -fopenmp -DMCMC_USE_OPENMP"
     fi
 fi
 

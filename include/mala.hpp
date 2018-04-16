@@ -4,15 +4,17 @@
   ##
   ##   This file is part of the MCMC C++ library.
   ##
-  ##   MCMC is free software: you can redistribute it and/or modify
-  ##   it under the terms of the GNU General Public License as published by
-  ##   the Free Software Foundation, either version 2 of the License, or
-  ##   (at your option) any later version.
+  ##   Licensed under the Apache License, Version 2.0 (the "License");
+  ##   you may not use this file except in compliance with the License.
+  ##   You may obtain a copy of the License at
   ##
-  ##   MCMC is distributed in the hope that it will be useful,
-  ##   but WITHOUT ANY WARRANTY; without even the implied warranty of
-  ##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  ##   GNU General Public License for more details.
+  ##       http://www.apache.org/licenses/LICENSE-2.0
+  ##
+  ##   Unless required by applicable law or agreed to in writing, software
+  ##   distributed under the License is distributed on an "AS IS" BASIS,
+  ##   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ##   See the License for the specific language governing permissions and
+  ##   limitations under the License.
   ##
   ################################################################################*/
  
@@ -40,8 +42,8 @@ mala_prop_adjustment(const arma::vec& prop_vals, const arma::vec& prev_vals, con
 
     //
 
-    if (vals_bound) {
-
+    if (vals_bound) 
+    {
         arma::mat prop_inv_jacob, prev_inv_jacob;
 
         arma::vec prop_mean = mala_mean_fn(prop_vals, target_data, step_size, &prop_inv_jacob);
@@ -49,7 +51,9 @@ mala_prop_adjustment(const arma::vec& prop_vals, const arma::vec& prev_vals, con
 
         ret_val = stats_mcmc::dmvnorm(prev_vals, prop_mean, step_size_sq*prop_inv_jacob*precond_mat, true) - stats_mcmc::dmvnorm(prop_vals, prev_mean, step_size_sq*prop_inv_jacob*precond_mat, true);
 
-    } else {
+    }
+    else
+    {
         arma::vec prop_mean = mala_mean_fn(prop_vals, target_data, step_size, nullptr);
         arma::vec prev_mean = mala_mean_fn(prev_vals, target_data, step_size, nullptr);
 
