@@ -59,15 +59,16 @@ make
 make install
 ```
 
-The last line will install MCMCLib into `/usr/local`.
+The last line will install MCMC to `/usr/local`.
 
-There are several configure options available:
-* `-c` a coverage build (used with Codecov)
-* `-d` 'development' build with install names set to the build directory (as opposed to an install path)
-* `-g` a debugging build (optimization flags set to: `-O0 -g`)
+There are several configure options available (`./configure -h`):
+* `-c` a coverage build
+* `-d` a 'development' build with install names set to the build directory (as opposed to an install path)
+* `-g` a debugging build
+* `-h` print help
 * `-m` specify the BLAS and Lapack libraries to link against; for example, `-m "-lopenblas"` or `-m "-framework Accelerate"`
 * `-o` compiler optimization options; defaults to `-O3 -march=native -ffp-contract=fast -flto -DARMA_NO_DEBUG`
-* `-p` enable parallelization features (using OpenMP)
+* `-p` enable OpenMP parallelization features
 
 
 ## Example
@@ -158,6 +159,6 @@ Keith O'Hara
 
 ## License
 
-GPL (>= 2)
+Apache Version 2
 
 
