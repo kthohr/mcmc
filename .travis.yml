@@ -62,7 +62,7 @@ install:
       fi
 
 script:
-  - ./configure -c -d
+  - ./configure -c
   - make
   - cd ./tests
   - ./cov_setup
