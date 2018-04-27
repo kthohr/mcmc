@@ -14,6 +14,7 @@ Features:
     - Equi-Energy sampling; and
     - Differential Evolution (DE).
 * Built on the [Armadillo C++ linear algebra library](http://arma.sourceforge.net/) for fast and efficient matrix-based computation.
+* Released under a permissive, non-GPL license.
 
 ## Status
 
@@ -50,26 +51,34 @@ bool rwmh(const arma::vec& initial_vals, arma::mat& draws_out, std::function<dou
 The library is installed in the usual way:
 
 ```bash
-# clone mcmc into the current directory
+# clone MCMCLib into the current directory
 git clone https://github.com/kthohr/mcmc ./mcmc
 # build and install
 cd ./mcmc
-./configure
+./configure -i "/usr/local" -p
 make
 make install
 ```
 
-The last line will install MCMC to `/usr/local`.
+The last line will install MCMCLib to `/usr/local`.
 
 There are several configure options available (`./configure -h`):
-* `-c` a coverage build
-* `-d` a 'development' build with install names set to the build directory (as opposed to an install path)
-* `-g` a debugging build
+* `-c` a coverage build (used with Codecov)
+* `-d` a 'development' build
+* `-g` a debugging build (optimization flags set to `-O0 -g`)
 * `-h` print help
+* `-i` install path; default: current directory.
 * `-m` specify the BLAS and Lapack libraries to link against; for example, `-m "-lopenblas"` or `-m "-framework Accelerate"`
 * `-o` compiler optimization options; defaults to `-O3 -march=native -ffp-contract=fast -flto -DARMA_NO_DEBUG`
-* `-p` enable OpenMP parallelization features
+* `-p` enable OpenMP parallelization features (*recommended*)
 
+### Armadillo
+
+MCMCLib is built on the Armadillo C++ linear algebra library. The build script will search for Armadillo files in the usual places: `/usr/include`, `/usr/local/include`, `/opt/include`, `/opt/local/include`. If the Armadillo header files were installed to a different location, set:
+``` bash
+export ARMA_INCLUDE_PATH=/path/to/armadillo
+```
+before running `./configure`. Otherwise the build script will download the required files from the Armadillo GitHub repository.
 
 ## Example
 

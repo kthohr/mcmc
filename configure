@@ -1,28 +1,31 @@
 #!/bin/bash
-## MCMC config script
+## MCMCLib config script
 
 function print_help
 {
-    # echo "" ;
-    echo -e "\x1B[32mConfigure options:\033[0m" >&2 ;
     echo "" ;
+    echo -e "\x1B[32mMCMCLib configure options:\033[0m" >&2 ;
     echo "-c    Coverage build" ;
-    echo "-d    Development build (install paths set to current directory)" ;
+    echo "-d    Development build" ;
     echo "-g    Debugging build (optimization flags set to -O0 -g)" ;
     echo "-h    Print help" ;
+    echo "-i    Install path (default: current directory)" ;
+    echo "        Example: /usr/local" ;
     echo "-m    Specify the BLAS and Lapack libraries to link against" ; 
     echo "        Examples: -m \"-lopenblas\" or -m \"-framework Accelerate\"" ;
     echo "-o    Compiler optimization options; defaults to:" ;
     echo "        -O3 -march=native -ffp-contract=fast -flto -DARMA_NO_DEBUG" ;
     echo "-p    Enable OpenMP parallelization features" ;
+    echo "" ;
 }
 
-while getopts hcdgm:o:p option; do
+while getopts hcdgi:m:o:p option; do
     case "${option}" in
         h) print_help; exit 2;;
         c) MCMC_COVERAGE="y";;
         d) MCMC_BUILD="dev";;
-        g) MCMC_DEBUG="y";;
+        g) MCMC_DEBUG_BUILD="y";;
+        i) MCMC_INSTALL_PATH=${OPTARG};;
         m) MCMC_MATRIX_OPS=${OPTARG};;
         o) MCMC_OPT=${OPTARG};;
         p) MCMC_PARALLEL="y";;
@@ -40,26 +43,22 @@ if [ -z ${FC+x} ]; then
     FC=gfortran
 fi
 
+#
+
+echo ""
+echo -e "\x1B[32mMCMCLib Configuration...\033[0m" >&2 ;
+echo ""
+
 # compiler checks
 
 IS_DARWIN=$($CXX -dumpmachine 2>&1 | grep -i -c "darwin")
 GCC_COMPILER=$($CXX --version 2>&1 | grep -i -c -E "gcc")
-# APPLE_COMPILER=$($CXX --version 2>&1 | grep -i -c -E 'apple llvm')
-
-# announcements
-
-echo ""
-if [[ "${MCMC_BUILD}" == "dev" ]]; then
-    echo "MCMC: dev version"
-fi
-
-if [[ "${MCMC_COVERAGE}" == "y" ]]; then 
-    echo "MCMC: coverage build"
-fi
+APPLE_COMPILER=$($CXX --version 2>&1 | grep -i -c -E 'apple llvm')
 
 # get working directory
 WDIR=${PWD}
 
+# look for Armadillo
 if [ -z ${ARMA_INCLUDE_PATH+x} ]; then
     
     declare -a ARMA_DIRS=("${WDIR}/include" "/usr/include" "/usr/local/include" "/opt/include" "/opt/local/include")
@@ -73,37 +72,29 @@ if [ -z ${ARMA_INCLUDE_PATH+x} ]; then
     done
 
     if [[ $ARMA_INCLUDE_PATH == "" ]]; then
-        echo ""
-        echo "MCMC: cannot find armadillo files. Cloning from GitHub"
+        echo -e "\x1B[31m  - note: cannot find Armadillo files. Cloning from GitHub\033[0m" >&2 ;
         echo ""
 
         mkdir ${WDIR}/arma_tmp
-        git clone -b unstable --single-branch https://github.com/conradsnicta/armadillo-code ${WDIR}/arma_tmp
+        git clone -b unstable --single-branch https://github.com/conradsnicta/armadillo-code ${WDIR}/arma_tmp > /dev/null 2>&1
         mv ${WDIR}/arma_tmp/include/* ${WDIR}/include
         rm -rf ${WDIR}/arma_tmp
         ARMA_INCLUDE_PATH="./include"
-
-        echo ""
     fi
 fi
-
-echo "MCMC: ARMA_INCLUDE_PATH set to: ${ARMA_INCLUDE_PATH}"
 
 # set build and optimization flags
 
 if [[ "${MCMC_COVERAGE}" == "y" ]]; then 
-    MCMC_OPT_FLAGS="-g -O0 -Wall --coverage -fno-inline -fno-inline-small-functions -fno-default-inline"
+    MCMC_OPT_FLAGS="-g -O0 --coverage -fno-inline -fno-inline-small-functions -fno-default-inline"
 else
     if [[ "${MCMC_OPT}" == "" ]]; then
-        # MCMC_OPT_FLAGS="-Ofast -march=native -DARMA_NO_DEBUG"
-        # echo "MCMC: experimental optimization; use of NaN or +/-Inf not recognized"
         MCMC_OPT_FLAGS="-O3 -march=native -ffp-contract=fast -flto -DARMA_NO_DEBUG"
     else
         MCMC_OPT_FLAGS="${MCMC_OPT}"
     fi
 
     if [[ "${MCMC_PARALLEL}" == "y" ]]; then
-        echo "MCMC: using OpenMP"
         MCMC_OPT_FLAGS="${MCMC_OPT_FLAGS} -fopenmp"
     fi
 fi
@@ -114,30 +105,22 @@ MCMC_WARN_FLAGS="-Wall"
 
 MCMC_SHLIB_NAME="libmcmc.so"
 
-if [[ !("${MCMC_BUILD}" == "dev") ]]; then
-    if [ -z ${MCMC_INSTALL_PATH+x} ]; then
-        MCMC_INSTALL_PATH="/usr/local"
-    fi
-    echo ""
-    echo "MCMC: install path set to: ${MCMC_INSTALL_PATH}"
+if [[ "${MCMC_INSTALL_PATH}" == "" ]]; then
+    MCMC_INSTALL_PATH="${WDIR}"
+    MCMC_INSTALL_LIB_PATH="${WDIR}"
+else
+    MCMC_INSTALL_LIB_PATH="${MCMC_INSTALL_PATH}/lib"
 fi
 
 if [[ $OSTYPE == darwin* ]] ; then
-    if [[ "${MCMC_BUILD}" == "dev" ]]; then
-        MCMC_SHLIB_FLAGS="-dynamiclib -install_name ${WDIR}/${MCMC_SHLIB_NAME} -Wl,-headerpad_max_install_names -undefined dynamic_lookup -single_module -multiply_defined suppress"
-    else
-        MCMC_SHLIB_FLAGS="-dynamiclib -install_name ${MCMC_INSTALL_PATH}/lib/${MCMC_SHLIB_NAME} -Wl,-headerpad_max_install_names -undefined dynamic_lookup -single_module -multiply_defined suppress"
-    fi
 
+    MCMC_SHLIB_FLAGS="-dynamiclib -install_name ${MCMC_INSTALL_LIB_PATH}/${MCMC_SHLIB_NAME} -Wl,-headerpad_max_install_names -undefined dynamic_lookup -single_module -multiply_defined suppress"
     MCMC_BLAS_LAPACK="-framework Accelerate"
-elif [[ $OSTYPE == *linux* ]] ; then
-    MCMC_OPT_FLAGS="-fPIC ${MCMC_OPT_FLAGS}"
 
-    if [[ "${MCMC_BUILD}" == "dev" ]]; then
-        MCMC_SHLIB_FLAGS="-fPIC -shared -L${WDIR} -Wl,-Bsymbolic-functions -Wl,-z,relro "
-    else
-        MCMC_SHLIB_FLAGS="-fPIC -shared -L${MCMC_INSTALL_PATH}/lib -Wl,-Bsymbolic-functions -Wl,-z,relro"
-    fi
+elif [[ $OSTYPE == *linux* ]] ; then
+
+    MCMC_OPT_FLAGS="-fPIC ${MCMC_OPT_FLAGS}"
+    MCMC_SHLIB_FLAGS="-fPIC -shared -L${MCMC_INSTALL_LIB_PATH} -Wl,-Bsymbolic-functions -Wl,-z,relro"
 
     MCMC_BLAS_LAPACK="-lblas -llapack"
 else
@@ -146,19 +129,15 @@ fi
 
 if [[ !(-z ${MCMC_MATRIX_OPS+x}) ]]; then
     MCMC_BLAS_LAPACK="${MCMC_MATRIX_OPS}"
-    echo ""
-    echo "MCMC: BLAS and Lapack libraries set to ${MCMC_BLAS_LAPACK}"
 fi
 
 if [ "$IS_DARWIN" -eq "1" ] && [ "$GCC_COMPILER" -eq "1" ]; then
-    echo ""
-    echo "MCMC: To enable AVX features, your compiler will use the Apple LLVM assembler"
     MCMC_OPT_FLAGS="-Wa,-q ${MCMC_OPT_FLAGS}"
 fi
 
 # final optimization checks
 
-if [[ "${MCMC_DEBUG}" == "y" ]]; then
+if [[ "${MCMC_DEBUG_BUILD}" == "y" ]]; then
     MCMC_OPT_FLAGS="-O0 -g"
 fi
 
@@ -168,11 +147,61 @@ else
     MCMC_SHLIB_FLAGS="${MCMC_OPT_FLAGS} ${MCMC_SHLIB_FLAGS}"
 fi
 
-echo "MCMC: optimization flags set to: ${MCMC_OPT_FLAGS}"
+#
 
-# end
+#
+# final print:
+
+echo "  - OS: ${OSTYPE}"
+
+if [[ "${MCMC_BUILD}" == "dev" ]]; then
+    echo "  - Build version: development"
+elif [[ "${MCMC_COVERAGE_BUILD}" == "y" ]]; then
+    echo "  - Build version: coverage"
+elif [[ "${MCMC_DEBUG_BUILD}" == "y" ]]; then
+    echo "  - Build version: debug"
+else
+    echo "  - Build version: release"
+fi
 
 echo ""
+
+echo "  - ARMA_INCLUDE_PATH set to:"
+echo "    ${ARMA_INCLUDE_PATH}"
+echo "  - BLAS and Lapack libraries set to:"
+echo "    ${MCMC_BLAS_LAPACK}"
+
+echo ""
+
+if [[ "${MCMC_PARALLEL}" == "y" ]]; then
+    echo -e "  - OpenMP features: \x1B[32menabled\033[0m" >&2 ;
+else
+    echo -e "  - OpenMP features: \x1B[31mdisabled\033[0m" >&2 ;
+fi
+
+echo "  - optimization flags:"
+echo "    ${MCMC_OPT_FLAGS}"
+
+echo ""
+
+echo "  - MCMCLib install path:"
+echo "    ${MCMC_INSTALL_PATH}"
+
+echo ""
+echo "  - Additional notes:"
+
+if [ "$APPLE_COMPILER" -eq "1" ] && [[ "${MCMC_PARALLEL}" == "y" ]]; then
+    echo -e "    \x1B[31m- You have enabled OpenMP, but your C++ compiler does not\033[0m" >&2 ;
+    echo -e "    \x1B[31m  support this feature!\033[0m" >&2 ;
+fi
+
+if [ "$IS_DARWIN" -eq "1" ] && [ "$GCC_COMPILER" -eq "1" ]; then
+    echo "    - To enable AVX features, your compiler will use the Apple LLVM"
+    echo "      assembler"
+fi
+
+echo ""
+echo -e "\x1B[32mConfiguration completed. Creating Makefile... \c\033[0m" >&2 ;
 
 sed -e "s|@CC@|${CC}|" \
     -e "s|@CXX@|${CXX}|" \
@@ -185,3 +214,6 @@ sed -e "s|@CC@|${CC}|" \
     -e "s|@MCMC_SHLIB_FLAGS@|${MCMC_SHLIB_FLAGS}|" \
     -e "s|@MCMC_INSTALL_PATH@|${MCMC_INSTALL_PATH}|" \
     Makefile.in > Makefile
+
+echo -e "\x1B[32mdone.\033[0m" >&2 ;
+echo ""

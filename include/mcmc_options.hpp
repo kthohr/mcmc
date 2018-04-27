@@ -35,7 +35,38 @@
 #endif
 
 
-// basic settings
+//
+
+#if defined(_OPENMP) && !defined(MCMC_DONT_USE_OPENMP)
+    #undef MCMC_USE_OPENMP
+    #define MCMC_USE_OPENMP
+#endif
+
+#if !defined(_OPENMP) && defined(MCMC_USE_OPENMP)
+    #undef MCMC_USE_OPENMP
+
+    #undef MCMC_DONE_USE_OPENMP
+    #define MCMC_DONE_USE_OPENMP
+#endif
+
+#ifdef MCMC_USE_OPENMP
+    // #include "omp.h" //  OpenMP
+    #ifndef ARMA_USE_OPENMP
+        #define ARMA_USE_OPENMP
+    #endif
+#endif
+
+#ifdef MCMC_DONT_USE_OPENMP
+    #ifdef MCMC_USE_OPENMP
+        #undef MCMC_USE_OPENMP
+    #endif
+
+    #ifndef ARMA_DONT_USE_OPENMP
+        #define ARMA_DONT_USE_OPENMP
+    #endif
+#endif
+
+//
 
 #ifdef USE_RCPP_ARMADILLO
     #include <RcppArmadillo.h>
@@ -44,10 +75,6 @@
         #define ARMA_DONT_USE_WRAPPER
     #endif
     #include "armadillo"
-#endif
-
-#if defined(_OPENMP) && !defined(MCMC_DONT_USE_OPENMP) && !defined(MCMC_USE_OPENMP)
-    #define MCMC_USE_OPENMP
 #endif
 
 // typedefs
