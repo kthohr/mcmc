@@ -22,7 +22,7 @@ function print_help
 while getopts hcdgi:m:o:p option; do
     case "${option}" in
         h) print_help; exit 2;;
-        c) MCMC_COVERAGE="y";;
+        c) MCMC_COVERAGE_BUILD="y";;
         d) MCMC_BUILD="dev";;
         g) MCMC_DEBUG_BUILD="y";;
         i) MCMC_INSTALL_PATH=${OPTARG};;
@@ -85,7 +85,7 @@ fi
 
 # set build and optimization flags
 
-if [[ "${MCMC_COVERAGE}" == "y" ]]; then 
+if [[ "${MCMC_COVERAGE_BUILD}" == "y" ]]; then 
     MCMC_OPT_FLAGS="-g -O0 --coverage -fno-inline -fno-inline-small-functions -fno-default-inline"
 else
     if [[ "${MCMC_OPT}" == "" ]]; then
@@ -141,7 +141,7 @@ if [[ "${MCMC_DEBUG_BUILD}" == "y" ]]; then
     MCMC_OPT_FLAGS="-O0 -g"
 fi
 
-if [[ "${MCMC_COVERAGE}" == "y" ]]; then 
+if [[ "${MCMC_COVERAGE_BUILD}" == "y" ]]; then 
     MCMC_SHLIB_FLAGS="--coverage ${MCMC_SHLIB_FLAGS}"
 else
     MCMC_SHLIB_FLAGS="${MCMC_OPT_FLAGS} ${MCMC_SHLIB_FLAGS}"
