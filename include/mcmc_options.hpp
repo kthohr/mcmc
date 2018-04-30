@@ -34,7 +34,6 @@
     #define MCMC_VERSION_PATCH 0
 #endif
 
-
 //
 
 #if defined(_OPENMP) && !defined(MCMC_DONT_USE_OPENMP)

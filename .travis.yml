@@ -2,9 +2,6 @@
 language: c++
 sudo: required
 
-branches:
-  except: /pr\/.*/
-
 matrix:
   include:
     - os: linux
@@ -65,7 +62,7 @@ script:
   - ./configure -c
   - make
   - cd ./tests
-  - ./cov_setup
+  - ./setup && ./test_setup/run_cov
   - cd ..
 
 after_success:
