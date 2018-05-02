@@ -23,7 +23,7 @@ while getopts hcdgi:m:o:p option; do
     case "${option}" in
         h) print_help; exit 2;;
         c) MCMC_COVERAGE_BUILD="y";;
-        d) MCMC_BUILD="dev";;
+        d) MCMC_DEV_BUILD="dev";;
         g) MCMC_DEBUG_BUILD="y";;
         i) MCMC_INSTALL_PATH=${OPTARG};;
         m) MCMC_MATRIX_OPS=${OPTARG};;
@@ -89,7 +89,7 @@ if [[ "${MCMC_COVERAGE_BUILD}" == "y" ]]; then
     MCMC_OPT_FLAGS="-g -O0 --coverage -fno-inline -fno-inline-small-functions -fno-default-inline"
 else
     if [[ "${MCMC_OPT}" == "" ]]; then
-        MCMC_OPT_FLAGS="-O3 -march=native -ffp-contract=fast -flto -DARMA_NO_DEBUG"
+        MCMC_OPT_FLAGS="-O3 -march=native -ffp-contract=fast -flto -DNDEBUG -DARMA_NO_DEBUG"
     else
         MCMC_OPT_FLAGS="${MCMC_OPT}"
     fi
@@ -155,7 +155,7 @@ fi
 echo "  - OS:            ${OSTYPE}"
 echo "  - C++ compiler:  ${CXX}"
 
-if [[ "${MCMC_BUILD}" == "dev" ]]; then
+if [[ "${MCMC_DEV_BUILD}" == "dev" ]]; then
     echo "  - Build version: development"
 elif [[ "${MCMC_COVERAGE_BUILD}" == "y" ]]; then
     echo "  - Build version: coverage"
