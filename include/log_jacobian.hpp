@@ -39,7 +39,15 @@ log_jacobian(const arma::vec& vals_trans_inp, const arma::uvec& bounds_type, con
                 ret_val += - vals_trans_inp(i);
                 break;
             case 4: // upper and lower bounds
-                ret_val += std::log(upper_bounds(i) - lower_bounds(i)) + vals_trans_inp(i) - 2 * std::log(1 + std::exp(vals_trans_inp(i)));
+                double exp_inp = std::exp(vals_trans_inp(i));
+                if (std::isfinite(exp_inp))
+                {
+                    ret_val += std::log(upper_bounds(i) - lower_bounds(i)) + vals_trans_inp(i) - 2 * std::log(1 + exp_inp);
+                }
+                else
+                {
+                    ret_val += std::log(upper_bounds(i) - lower_bounds(i)) - vals_trans_inp(i);
+                }
                 break;
         }
     }

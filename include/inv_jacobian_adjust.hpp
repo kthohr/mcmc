@@ -39,7 +39,8 @@ inv_jacobian_adjust(const arma::vec& vals_trans_inp, const arma::uvec& bounds_ty
                 ret_mat(i,i) = 1.0 / std::exp(-vals_trans_inp(i));
                 break;
             case 4: // upper and lower bounds
-                ret_mat(i,i) = 1.0 / ( std::exp(vals_trans_inp(i))*(upper_bounds(i) - lower_bounds(i)) / std::pow(std::exp(vals_trans_inp(i)) + 1,2) );
+                double exp_inp = std::exp(vals_trans_inp(i));
+                ret_mat(i,i) = 1.0 / ( exp_inp*(upper_bounds(i) - lower_bounds(i)) / std::pow(exp_inp + 1,2) );
                 break;
         }
     }
