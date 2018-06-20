@@ -144,30 +144,33 @@ mcmc::aees_int(const arma::vec& initial_vals, arma::mat& draws_out, std::functio
                 }
                 else
                 {
-                    size_t initial_j = (j-1)*(n_initial_draws + n_burnin);
-                    
-                    size_t ring_ind_spacing = std::floor( (n - initial_j + 1) / n_rings);
-                    
-                    if (ring_ind_spacing == 0) 
+                    size_t draws_j_begin_ind = (j-1)*(n_initial_draws + n_burnin);
+
+                    size_t ring_ind_spacing = std::floor( (double)(n - draws_j_begin_ind + 1) / n_rings);
+
+                    if (ring_ind_spacing == 0)
                     {
                         X_new.col(j) = X_prev.col(j);
                         kernel_vals_new.col(j) = kernel_vals_prev.col(j);
                     }
                     else
                     {
-                        arma::vec past_kernel_vals = arma::trans(kernel_vals(arma::span(j-1,j-1),arma::span(initial_j,n)));
+                        arma::vec past_kernel_vals = arma::trans(kernel_vals(arma::span(j-1,j-1),arma::span(draws_j_begin_ind,n)));
 
                         arma::uvec sort_ind = arma::sort_index(past_kernel_vals);
                         past_kernel_vals = past_kernel_vals(sort_ind);
 
                         // construct rings
 
-                        for (size_t i=0; i < (n_rings-1); i++) {
-                            ring_vals(j-1,i) = (past_kernel_vals((i+1)*ring_ind_spacing) + past_kernel_vals((i+1)*ring_ind_spacing-1)) / 2.0;
+                        for (size_t i=0; i < (n_rings-1); i++)
+                        {
+                            int ring_i_ind = (i+1)*ring_ind_spacing;
+                            ring_vals(j-1,i) = (past_kernel_vals(ring_i_ind) + past_kernel_vals(ring_i_ind-1)) / 2.0;
                         }
-                        
+
                         size_t which_ring = 0;
-                        while ( which_ring < (n_rings-1) && kernel_vals(j,n-1) > ring_vals(j-1,which_ring) ) {
+                        while ( which_ring < (n_rings-1) && kernel_vals(j,n-1) > ring_vals(j-1,which_ring) )
+                        {
                             which_ring++;
                         }
 
