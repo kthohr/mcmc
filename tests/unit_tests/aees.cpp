@@ -89,7 +89,7 @@ int main()
 
     //
 
-    mcmc::algo_settings settings;
+    mcmc::algo_settings_t settings;
 
     settings.aees_n_draws = 20000;
     settings.aees_n_burnin = 1000;

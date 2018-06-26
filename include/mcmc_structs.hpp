@@ -21,7 +21,8 @@
 #ifndef mcmc_structs_HPP
 #define mcmc_structs_HPP
 
-struct algo_settings {
+struct algo_settings_t
+{
     // general
     bool vals_bound = false;
 

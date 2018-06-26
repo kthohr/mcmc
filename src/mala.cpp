@@ -25,7 +25,7 @@
 #include "mcmc.hpp" 
 
 bool
-mcmc::mala_int(const arma::vec& initial_vals, arma::mat& draws_out, std::function<double (const arma::vec& vals_inp, arma::vec* grad_out, void* target_data)> target_log_kernel, void* target_data, algo_settings* settings_inp)
+mcmc::mala_int(const arma::vec& initial_vals, arma::mat& draws_out, std::function<double (const arma::vec& vals_inp, arma::vec* grad_out, void* target_data)> target_log_kernel, void* target_data, algo_settings_t* settings_inp)
 {
     bool success = false;
 
@@ -34,7 +34,7 @@ mcmc::mala_int(const arma::vec& initial_vals, arma::mat& draws_out, std::functio
     //
     // MALA settings
 
-    algo_settings settings;
+    algo_settings_t settings;
 
     if (settings_inp) {
         settings = *settings_inp;
@@ -205,7 +205,7 @@ mcmc::mala(const arma::vec& initial_vals, arma::mat& draws_out, std::function<do
 }
 
 bool
-mcmc::mala(const arma::vec& initial_vals, arma::mat& draws_out, std::function<double (const arma::vec& vals_inp, arma::vec* grad_out, void* target_data)> target_log_kernel, void* target_data, algo_settings& settings)
+mcmc::mala(const arma::vec& initial_vals, arma::mat& draws_out, std::function<double (const arma::vec& vals_inp, arma::vec* grad_out, void* target_data)> target_log_kernel, void* target_data, algo_settings_t& settings)
 {
     return mala_int(initial_vals,draws_out,target_log_kernel,target_data,&settings);
 }

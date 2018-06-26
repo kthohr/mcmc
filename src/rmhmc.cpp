@@ -25,7 +25,7 @@
 #include "mcmc.hpp" 
 
 bool
-mcmc::rmhmc_int(const arma::vec& initial_vals, arma::mat& draws_out, std::function<double (const arma::vec& vals_inp, arma::vec* grad_out, void* target_data)> target_log_kernel, void* target_data, std::function<arma::mat (const arma::vec& vals_inp, arma::cube* tensor_deriv_out, void* tensor_data)> tensor_fn, void* tensor_data, algo_settings* settings_inp)
+mcmc::rmhmc_int(const arma::vec& initial_vals, arma::mat& draws_out, std::function<double (const arma::vec& vals_inp, arma::vec* grad_out, void* target_data)> target_log_kernel, void* target_data, std::function<arma::mat (const arma::vec& vals_inp, arma::cube* tensor_deriv_out, void* tensor_data)> tensor_fn, void* tensor_data, algo_settings_t* settings_inp)
 {
     bool success = false;
 
@@ -34,7 +34,7 @@ mcmc::rmhmc_int(const arma::vec& initial_vals, arma::mat& draws_out, std::functi
     //
     // settings
 
-    algo_settings settings;
+    algo_settings_t settings;
 
     if (settings_inp) {
         settings = *settings_inp;
@@ -291,7 +291,7 @@ mcmc::rmhmc(const arma::vec& initial_vals, arma::mat& draws_out, std::function<d
 }
 
 bool
-mcmc::rmhmc(const arma::vec& initial_vals, arma::mat& draws_out, std::function<double (const arma::vec& vals_inp, arma::vec* grad_out, void* target_data)> target_log_kernel, void* target_data, std::function<arma::mat (const arma::vec& vals_inp, arma::cube* tensor_deriv_out, void* tensor_data)> tensor_fn, void* tensor_data, algo_settings& settings)
+mcmc::rmhmc(const arma::vec& initial_vals, arma::mat& draws_out, std::function<double (const arma::vec& vals_inp, arma::vec* grad_out, void* target_data)> target_log_kernel, void* target_data, std::function<arma::mat (const arma::vec& vals_inp, arma::cube* tensor_deriv_out, void* tensor_data)> tensor_fn, void* tensor_data, algo_settings_t& settings)
 {
     return rmhmc_int(initial_vals,draws_out,target_log_kernel,target_data,tensor_fn,tensor_data,&settings);
 }

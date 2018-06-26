@@ -82,7 +82,7 @@ int main()
     initial_val(0) = mu + 1; // mu
     initial_val(1) = sigma + 1; // sigma
 
-    mcmc::algo_settings settings;
+    mcmc::algo_settings_t settings;
 
     settings.mala_step_size = 1.5;
     settings.mala_n_burnin = 2000;
@@ -117,7 +117,7 @@ int main()
     //
     //
 
-    // mcmc::algo_settings settings;
+    // mcmc::algo_settings_t settings;
 
     // arma::vec lb(1);
     // lb(0) = 0.0;

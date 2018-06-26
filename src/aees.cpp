@@ -25,7 +25,7 @@
 #include "mcmc.hpp"
 
 bool
-mcmc::aees_int(const arma::vec& initial_vals, arma::mat& draws_out, std::function<double (const arma::vec& vals_inp, void* target_data)> target_log_kernel, void* target_data, algo_settings* settings_inp)
+mcmc::aees_int(const arma::vec& initial_vals, arma::mat& draws_out, std::function<double (const arma::vec& vals_inp, void* target_data)> target_log_kernel, void* target_data, algo_settings_t* settings_inp)
 {
     bool success = false;
 
@@ -34,7 +34,7 @@ mcmc::aees_int(const arma::vec& initial_vals, arma::mat& draws_out, std::functio
     //
     // AEES settings
 
-    algo_settings settings;
+    algo_settings_t settings;
 
     if (settings_inp) {
         settings = *settings_inp;
@@ -116,31 +116,37 @@ mcmc::aees_int(const arma::vec& initial_vals, arma::mat& draws_out, std::functio
     //
     // begin loop
 
-    double val_out; // holds kernel value
-
     for (size_t n=0; n < total_draws; n++)
     {
         arma::mat X_prev = X_new;
         kernel_vals_prev = kernel_vals_new;
 
-        X_new.col(0) = single_step_mh(X_prev.col(0), temper_vec(0), sqrt_cov_mcmc, box_log_kernel, target_data, &val_out);
+        //
+
+        double val_out_hot; // holds kernel value
+
+        X_new.col(0) = single_step_mh(X_prev.col(0), temper_vec(0), sqrt_cov_mcmc, box_log_kernel, target_data, &val_out_hot);
         
-        kernel_vals_new.col(0).fill(val_out);
+        kernel_vals_new.col(0).fill(val_out_hot);
         
         // loop down temperature vector
-
+        
+#ifdef MCMC_USE_OPENMP
+        #pragma omp parallel for
+#endif
         for (size_t j=1; j < K; j++) 
         {
-            if (n > j*(n_initial_draws + n_burnin)) 
-            {    
+            if (n > j*(n_initial_draws + n_burnin))
+            {
+                double val_out_j;
                 double z_eps = arma::as_scalar(arma::randu(1,1));
 
                 if (z_eps > ee_prob_par) 
                 {
-                    X_new.col(j) = single_step_mh(X_prev.col(j), temper_vec(j), sqrt_cov_mcmc, box_log_kernel, target_data, &val_out);
+                    X_new.col(j) = single_step_mh(X_prev.col(j), temper_vec(j), sqrt_cov_mcmc, box_log_kernel, target_data, &val_out_j);
 
-                    kernel_vals_new(0,j) = val_out / temper_vec(j-1);
-                    kernel_vals_new(1,j) = val_out / temper_vec(j);
+                    kernel_vals_new(0,j) = val_out_j / temper_vec(j-1);
+                    kernel_vals_new(1,j) = val_out_j / temper_vec(j);
                 }
                 else
                 {
@@ -184,10 +190,10 @@ mcmc::aees_int(const arma::vec& initial_vals, arma::mat& draws_out, std::functio
 
                         X_new.col(j) = X_out.slice(ind_mix).col(j-1);
 
-                        val_out = box_log_kernel(X_new.col(j), target_data);
+                        val_out_j = box_log_kernel(X_new.col(j), target_data);
 
-                        kernel_vals_new(0,j) = val_out / temper_vec(j-1);
-                        kernel_vals_new(1,j) = val_out / temper_vec(j);
+                        kernel_vals_new(0,j) = val_out_j / temper_vec(j-1);
+                        kernel_vals_new(1,j) = val_out_j / temper_vec(j);
 
                         //
                         
@@ -247,7 +253,7 @@ mcmc::aees(const arma::vec& initial_vals, arma::mat& draws_out, std::function<do
 }
 
 bool
-mcmc::aees(const arma::vec& initial_vals, arma::mat& draws_out, std::function<double (const arma::vec& vals_inp, void* target_data)> target_log_kernel, void* target_data, algo_settings& settings)
+mcmc::aees(const arma::vec& initial_vals, arma::mat& draws_out, std::function<double (const arma::vec& vals_inp, void* target_data)> target_log_kernel, void* target_data, algo_settings_t& settings)
 {
     return aees_int(initial_vals,draws_out,target_log_kernel,target_data,&settings);
 }

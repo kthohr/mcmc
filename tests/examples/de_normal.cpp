@@ -87,7 +87,7 @@ int main()
 
     //
 
-    mcmc::algo_settings settings;
+    mcmc::algo_settings_t settings;
 
     arma::vec initial_val(1);
     initial_val(0) = 1.0;

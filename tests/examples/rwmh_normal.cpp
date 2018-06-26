@@ -86,7 +86,7 @@ int main()
     arma::vec x_dta = mu + arma::randn(n_data,1);
     dta.x = x_dta;
 
-    mcmc::algo_settings settings;
+    mcmc::algo_settings_t settings;
     settings.rwmh_par_scale = 0.5;
 
     arma::vec initial_val(1);

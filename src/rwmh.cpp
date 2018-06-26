@@ -25,7 +25,7 @@
 #include "mcmc.hpp" 
 
 bool
-mcmc::rwmh_int(const arma::vec& initial_vals, arma::mat& draws_out, std::function<double (const arma::vec& vals_inp, void* target_data)> target_log_kernel, void* target_data, algo_settings* settings_inp)
+mcmc::rwmh_int(const arma::vec& initial_vals, arma::mat& draws_out, std::function<double (const arma::vec& vals_inp, void* target_data)> target_log_kernel, void* target_data, algo_settings_t* settings_inp)
 {
     bool success = false;
 
@@ -34,7 +34,7 @@ mcmc::rwmh_int(const arma::vec& initial_vals, arma::mat& draws_out, std::functio
     //
     // RWMH settings
 
-    algo_settings settings;
+    algo_settings_t settings;
 
     if (settings_inp) {
         settings = *settings_inp;
@@ -163,7 +163,7 @@ mcmc::rwmh(const arma::vec& initial_vals, arma::mat& draws_out, std::function<do
 }
 
 bool
-mcmc::rwmh(const arma::vec& initial_vals, arma::mat& draws_out, std::function<double (const arma::vec& vals_inp, void* target_data)> target_log_kernel, void* target_data, algo_settings& settings)
+mcmc::rwmh(const arma::vec& initial_vals, arma::mat& draws_out, std::function<double (const arma::vec& vals_inp, void* target_data)> target_log_kernel, void* target_data, algo_settings_t& settings)
 {
     return rwmh_int(initial_vals,draws_out,target_log_kernel,target_data,&settings);
 }

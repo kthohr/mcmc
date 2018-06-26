@@ -118,7 +118,7 @@ arma::mat tensor_fn(const arma::vec& vals_inp, arma::cube* tensor_deriv_out, voi
     initial_val(0) = mu + 1.0; // mu
     initial_val(1) = sigma + 1.0; // sigma
  
-    mcmc::algo_settings settings;
+    mcmc::algo_settings_t settings;
  
     settings.hmc_step_size = 0.1;
     settings.hmc_n_burnin = 1000;
