@@ -131,7 +131,7 @@ mcmc::de_int(const arma::vec& initial_vals, arma::cube& draws_out, std::function
 
                 //
 
-                arma::vec prop_rand = arma::randu(n_vals,1)*(2*par_b) - par_b; // generate a vector of U[-b,b] RVs
+                arma::rowvec prop_rand = arma::randu(1,n_vals)*(2*par_b) - par_b; // generate a vector of U[-b,b] RVs
 
                 arma::rowvec X_prop = X.row(i) + par_gamma_run * ( X.row(R_1) - X.row(R_2) ) + prop_rand;
                 

@@ -31,7 +31,7 @@
 #endif
 
 #ifndef MCMC_VERSION_PATCH
-    #define MCMC_VERSION_PATCH 0
+    #define MCMC_VERSION_PATCH 1
 #endif
 
 //
