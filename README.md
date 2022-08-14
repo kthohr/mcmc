@@ -59,24 +59,13 @@ The inputs, in order, are:
 * An array to store the posterior draws.
 * The final input is optional: it is any object that contains additional data necessary to evaluate the log posterior kernel function.
 
-For example, the BFGS algorithm is called using
-```cpp
-bfgs(ColVec_t& init_out_vals, std::function<double (const ColVec_t& vals_inp, ColVec_t* grad_out, void* opt_data)> opt_objfn, void* opt_data);
-```
-
-where ``ColVec_t`` is used to represent, e.g., ``arma::vec`` or ``Eigen::VectorXd`` types.
-
-
-where the inputs, in order, are:
-* a vector of initial values that define the starting point for the algorithm
-* the objective function to be minimized (or zeroed-out);
-* 
-* (optional) any additional parameters passed to the objective function; and
-
 For example, the RWMH algorithm is called using:
+
 ``` cpp
 bool rwmh(const ColVec_t& initial_vals, std::function<fp_t (const ColVec_t& vals_inp, void* target_data)> target_log_kernel, Mat_t& draws_out, void* target_data);
 ```
+
+where ``ColVec_t`` is used to represent, e.g., ``arma::vec`` or ``Eigen::VectorXd`` types.
 
 ## Installation
 
