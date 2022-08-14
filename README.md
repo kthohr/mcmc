@@ -1,4 +1,4 @@
-# OptimLib &nbsp; [![Build Status](https://github.com/kthohr/mcmc/actions/workflows/main.yml/badge.svg)](https://github.com/kthohr/mcmc/actions/workflows/main.yml) [![Coverage Status](https://codecov.io/github/kthohr/mcmc/coverage.svg?branch=master)](https://codecov.io/github/kthohr/mcmc?branch=master) [![License](https://img.shields.io/badge/Licence-Apache%202.0-blue.svg)](./LICENSE) [![Documentation Status](https://readthedocs.org/projects/mcmclib/badge/?version=latest)](https://mcmclib.readthedocs.io/en/latest/?badge=latest)
+# MCMCLib &nbsp; [![Build Status](https://github.com/kthohr/mcmc/actions/workflows/main.yml/badge.svg)](https://github.com/kthohr/mcmc/actions/workflows/main.yml) [![Coverage Status](https://codecov.io/github/kthohr/mcmc/coverage.svg?branch=master)](https://codecov.io/github/kthohr/mcmc?branch=master) [![License](https://img.shields.io/badge/Licence-Apache%202.0-blue.svg)](./LICENSE) [![Documentation Status](https://readthedocs.org/projects/mcmclib/badge/?version=latest)](https://mcmclib.readthedocs.io/en/latest/?badge=latest)
 
 MCMCLib is a lightweight C++ library of Markov Chain Monte Carlo (MCMC) methods.
 
@@ -170,7 +170,7 @@ To use MCMCLib with an R package, first generate a header-only version of the li
 
 ## Example
 
-To illustrate OptimLib at work, consider the problem of sampling values of the mean parameter of a normal distribution.
+To illustrate MCMCLib at work, consider the problem of sampling values of the mean parameter of a normal distribution.
 
 Code:
 
@@ -292,7 +292,7 @@ Check the `/examples` directory for additional examples, and https://mcmclib.rea
 
 ## Automatic Differentiation
 
-By combining Eigen with the [Autodiff library](https://autodiff.github.io), OptimLib provides experimental support for automatic differentiation. 
+By combining Eigen with the [Autodiff library](https://autodiff.github.io), MCMCLib provides experimental support for automatic differentiation. 
 
 Example using forward-mode automatic differentiation with BFGS for the Sphere function:
 
