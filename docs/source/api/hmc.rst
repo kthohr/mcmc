@@ -38,7 +38,7 @@ Let :math:`\theta^{(i)}` denote a :math:`d`-dimensional vector of stored values 
 
         \theta^{(*)} = \theta^{(*)} + \epsilon \times \mathbf{M}^{-1} p^{(*)}
 
-    where :math:`\mathbf{M}` is a pre-conditioning matrix set via ``mala_settings.precond_mat``.
+    where :math:`\mathbf{M}` is a pre-conditioning matrix set via ``hmc_settings.precond_mat``.
 
   iii. Momentum Update Half-Step.
 
