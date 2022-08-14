@@ -18,21 +18,15 @@
   ##
   ################################################################################*/
 
-#ifndef MCMC_INCLUDES
-#define MCMC_INCLUDES
+#ifndef MCMC_MCMC_INCLUDES
+#define MCMC_MCMC_INCLUDES
 
-#include "misc/mcmc_options.hpp"
+#include "rwmh.hpp"
+#include "mala.hpp"
+#include "hmc.hpp"
+#include "rmhmc.hpp"
 
-namespace mcmc
-{
-    // basic distribution functions
-    #include "stats/mcmc_stats.hpp"
-    
-    // misc/utility files
-    #include "misc/misc.hpp"
-
-    // MCMC algorithms
-    #include "mcmc/mcmc_algos.hpp"
-}
+#include "aees.hpp"
+#include "de.hpp"
 
 #endif

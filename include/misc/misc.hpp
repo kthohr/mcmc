@@ -18,21 +18,17 @@
   ##
   ################################################################################*/
 
-#ifndef MCMC_INCLUDES
-#define MCMC_INCLUDES
+#ifndef MCMC_MISC_INCLUDES
+#define MCMC_MISC_INCLUDES
 
-#include "misc/mcmc_options.hpp"
+// structs
+#include "mcmc_structs.hpp"
 
-namespace mcmc
-{
-    // basic distribution functions
-    #include "stats/mcmc_stats.hpp"
-    
-    // misc/utility files
-    #include "misc/misc.hpp"
-
-    // MCMC algorithms
-    #include "mcmc/mcmc_algos.hpp"
-}
+// utility files
+#include "determine_bounds_type.hpp"
+#include "bounds_check.hpp"
+#include "transform_vals.hpp"
+#include "log_jacobian.hpp"
+#include "inv_jacobian_adjust.hpp"
 
 #endif

@@ -18,21 +18,15 @@
   ##
   ################################################################################*/
 
-#ifndef MCMC_INCLUDES
-#define MCMC_INCLUDES
+#ifndef MCMCLIB_STATS_SEED_VALUES
+#define MCMCLIB_STATS_SEED_VALUES
 
-#include "misc/mcmc_options.hpp"
-
-namespace mcmc
+inline
+size_t
+generate_seed_value(const int ind_inp, const int n_threads, rand_engine_t& rand_engine)
 {
-    // basic distribution functions
-    #include "stats/mcmc_stats.hpp"
-    
-    // misc/utility files
-    #include "misc/misc.hpp"
-
-    // MCMC algorithms
-    #include "mcmc/mcmc_algos.hpp"
+    return static_cast<size_t>( (bmo::stats::runif<fp_t>(rand_engine) + ind_inp + n_threads) * 1000 );
+    // return static_cast<size_t>( (ind_inp + n_threads) * 1000 );
 }
 
 #endif
