@@ -18,21 +18,34 @@
   ##
   ################################################################################*/
 
-#ifndef MCMC_INCLUDES
-#define MCMC_INCLUDES
+/*
+ * PDF of univariate and multivariate normal distributions
+ */
 
-#include "misc/mcmc_options.hpp"
+#ifndef MCMC_STATS_INCLUDE
+#define MCMC_STATS_INCLUDE
 
-namespace mcmc
+#ifndef MCMC_LOG_2PI
+    #define MCMC_LOG_2PI 1.83787706640934548356L
+#endif
+
+namespace stats_mcmc
 {
-    // basic distribution functions
-    #include "stats/mcmc_stats.hpp"
-    
-    // misc/utility files
-    #include "misc/misc.hpp"
 
-    // MCMC algorithms
-    #include "mcmc/mcmc_algos.hpp"
+template<typename T>
+using return_t = typename std::conditional<std::is_integral<T>::value,double,T>::type;
+
+template<typename ...T>
+using common_t = typename std::common_type<T...>::type;
+
+template<typename ...T>
+using common_return_t = return_t<common_t<T...>>;
+
+#include "dnorm.hpp"
+#include "dmvnorm.hpp"
+
 }
+
+#include "seed_values.hpp"
 
 #endif

@@ -19,38 +19,31 @@
   ################################################################################*/
 
 /*
- * pdf of the Multivariate Normal distribution
+ * check and impose sampling bounds for DE
  */
 
-#ifndef MCMC_STATS_DMVNORM
-#define MCMC_STATS_DMVNORM
-
 inline
-fp_t
-dmvnorm(const ColVec_t& X, const ColVec_t& mu_par, const Mat_t& Sigma_par, bool log_form)
+void
+sampling_bounds_check(
+    const bool vals_bound,
+    const size_t n_vals,
+    const ColVecInt_t bounds_type,
+    const ColVec_t& hard_lower_bounds, 
+    const ColVec_t& hard_upper_bounds,
+    ColVec_t& sampling_lower_bounds,
+    ColVec_t& sampling_upper_bounds
+)
 {
-    const size_t K = BMO_MATOPS_SIZE(X);
-
-    //
-
-    const fp_t cons_term = - fp_t(0.5) * K * fp_t(MCMC_LOG_2PI);
-    const ColVec_t X_cent = X - mu_par; // avoids issues like Mat vs eGlue in templates
-
-    const fp_t quad_term = BMO_MATOPS_QUAD_FORM_INV(X_cent, Sigma_par);
-    
-    fp_t ret = cons_term - fp_t(0.5) * ( BMO_MATOPS_LOG_DET(Sigma_par) + quad_term );
-
-    if (!log_form) {
-        ret = std::exp(ret);
-        
-        if (std::isinf(ret)) {
-            ret = std::numeric_limits<fp_t>::max();
+    if (vals_bound) {
+        for (size_t i = 0; i < n_vals; ++i) {
+            if (bounds_type(i) == 4 || bounds_type(i) == 2) {
+                // lower and upper bound imposed || lower bound only
+                sampling_lower_bounds(i) = std::max( hard_lower_bounds(i), sampling_lower_bounds(i) );
+            }
+            if (bounds_type(i) == 4 || bounds_type(i) == 3) {
+                // lower and upper bound imposed || upper bound only
+                sampling_upper_bounds(i) = std::min( hard_upper_bounds(i), sampling_upper_bounds(i) );
+            }
         }
     }
-
-    //
-    
-    return ret;
 }
-
-#endif

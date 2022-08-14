@@ -2,96 +2,207 @@
 ## MCMCLib config script
 
 function print_help
-{
+{ 
     echo "" ;
-    echo -e "\x1B[32mMCMCLib configure options:\033[0m" >&2 ;
-    echo "-c    Coverage build" ;
-    echo "-d    Development build" ;
-    echo "-g    Debugging build (optimization flags set to -O0 -g)" ;
-    echo "-h    Print help" ;
-    echo "-i    Install path (default: current directory)" ;
-    echo "        Example: /usr/local" ;
-    echo "-m    Specify the BLAS and Lapack libraries to link against" ; 
-    echo "        Examples: -m \"-lopenblas\" or -m \"-framework Accelerate\"" ;
-    echo "-o    Compiler optimization options; defaults to:" ;
-    echo "        -O3 -march=native -ffp-contract=fast -flto -DARMA_NO_DEBUG" ;
-    echo "-p    Enable OpenMP parallelization features" ;
+    echo -e "\x1B[32mMCMCLib Configuration\033[0m" >&2 ;
+    echo "";
+    echo -e "Main options:" >&2 ;
+    echo "  -c    Code coverage build" ;
+    echo "        (default: disabled)" ;
+    echo "  -d    Developmental build" ;
+    echo "        (default: disabled)" ;
+    echo "  -f    Floating-point number type" ;
+    echo "        (default: double)" ;
+    echo "  -g    Debugging build (optimization flags set to -O0 -g)" ;
+    echo "        (default: disabled)" ;
+    echo "  -h    Print help" ;
+    echo "  -i    Install path (default: current directory)" ;
+    echo "          Example: /usr/local" ;
+    echo "  -l    Choice of linear algebra library" ;
+    echo "        Examples: -l arma or -l eigen" ;
+    echo "  -m    Specify the BLAS and Lapack libraries to link against" ; 
+    echo "          Examples: -m \"-lopenblas\" or -m \"-framework Accelerate\"" ;
+    echo "  -o    Compiler optimization options" ;
+    echo "        (default: -O3 -march=native -ffp-contract=fast -flto -DARMA_NO_DEBUG)" ;
+    echo "  -p    Enable OpenMP parallelization features" ;
+    echo "        (default: disabled)" ;
+    echo "" ;
+    echo "Special options:" ;
+    echo "  --header-only-version    Generate a header-only version of MCMCLib" ;
     echo "" ;
 }
 
-while getopts hcdgi:m:o:p option; do
+while getopts hcdgf:i:l:m:o:pr:-: option; do
     case "${option}" in
+        -)
+            case "${OPTARG}" in
+                header-only-version)
+                    MCMC_GEN_NEW_HEADERS="y";;
+                ?) print_help; exit 2;;
+            esac;;
         h) print_help; exit 2;;
         c) MCMC_COVERAGE_BUILD="y";;
-        d) MCMC_DEV_BUILD="dev";;
+        d) MCMC_DEV_BUILD="y";;
+        f) MCMC_FPN_TYPE=${OPTARG};;
         g) MCMC_DEBUG_BUILD="y";;
         i) MCMC_INSTALL_PATH=${OPTARG};;
+        l) MCMC_LINEAR_ALG_LIB=${OPTARG};;
         m) MCMC_MATRIX_OPS=${OPTARG};;
         o) MCMC_OPT=${OPTARG};;
         p) MCMC_PARALLEL="y";;
+        r) MCMC_R_BUILD=${OPTARG};;
         ?) print_help; exit 2;;
     esac
 done
 
-if [ -z ${CC+x} ]; then 
-    CC=gcc
-fi
 if [ -z ${CXX+x} ]; then 
     CXX=g++
 fi
-if [ -z ${FC+x} ]; then 
-    FC=gfortran
+
+# get working directory
+WDIR=${PWD}
+
+# compiler and system checks
+ARCH=$(uname -m)
+IS_ARM=$(echo $ARCH | grep -i -c "arm")
+IS_DARWIN=$($CXX -dumpmachine 2>&1 | grep -i -c "darwin")
+GCC_COMPILER=$($CXX --version 2>&1 | grep -i -c -E "gcc")
+CLANG_COMPILER=$($CXX --version 2>&1 | grep -i -c -E "clang")
+APPLE_COMPILER=$($CXX --version 2>&1 | grep -i -c -E 'apple llvm')
+
+# generate header-only version of MCMCLib
+
+if [[ "${MCMC_GEN_NEW_HEADERS}" == "y" ]]; then
+    rm -rf ./header_only_version
+    mkdir ./header_only_version
+
+    cp -rf ./include/* ./header_only_version/
+
+    #
+
+    declare -a DIRS=("mcmc")
+
+    for dir_ in "${DIRS[@]}"; do
+        cd "$WDIR"/header_only_version/"$dir_"
+        file_names=`ls *.hpp`
+
+        for file_ in $file_names; do
+            file_=${file_%.hpp}
+
+            #
+
+            if [ "$IS_DARWIN" -eq "1" ]; then # syntax for inplace replacement on macOS is a bit different
+                sed -i '' -e "s|#endif|//\n|" $file_.hpp
+            else
+                sed -i -e "s|#endif|//\n|" $file_.hpp
+            fi
+
+            sed -e '1,/\[MCMC_BEGIN\]/ d' $WDIR/src/"$file_".cpp | sed -e "s|mcmclib_inline|inline|" -e "s|mcmc::||" >> "$file_".hpp
+
+            echo -e "\n#endif" >> "$file_".hpp
+        done
+    done
+
+    exit 0
 fi
 
 #
 
 echo ""
-echo -e "\x1B[32mMCMCLib Configuration...\033[0m" >&2 ;
+echo -e "\x1B[32mMCMCLib Configuration\033[0m" >&2 ;
 echo ""
 
-# compiler checks
+declare -a MCMC_MATLIB_DIRS=("${WDIR}/../../include" "/usr/include" "/usr/local/include" "/opt/include" "/opt/local/include")
 
-IS_DARWIN=$($CXX -dumpmachine 2>&1 | grep -i -c "darwin")
-GCC_COMPILER=$($CXX --version 2>&1 | grep -i -c -E "gcc")
-APPLE_COMPILER=$($CXX --version 2>&1 | grep -i -c -E 'apple llvm')
+# look for linear algebra library header files
+if [[ "${MCMC_LINEAR_ALG_LIB}" == "arma" ]]; then
+    if [ -z ${ARMA_INCLUDE_PATH+x} ]; then 
+        
+        ARMA_INCLUDE_PATH=
 
-# get working directory
-WDIR=${PWD}
+        for i in "${MCMC_MATLIB_DIRS[@]}"; do
+            if [ -f "$i"/armadillo ]; then 
+                ARMA_INCLUDE_PATH="$i"
+                break
+            fi
+        done
 
-# look for Armadillo
-if [ -z ${ARMA_INCLUDE_PATH+x} ]; then
-    
-    declare -a ARMA_DIRS=("${WDIR}/include" "/usr/include" "/usr/local/include" "/opt/include" "/opt/local/include")
-    ARMA_INCLUDE_PATH=
-
-    for i in "${ARMA_DIRS[@]}"; do
-        if [ -f "$i"/armadillo ]; then 
-            ARMA_INCLUDE_PATH="$i"
-            break
+        if [[ $ARMA_INCLUDE_PATH == "" ]]; then
+            echo -e "  \x1B[31m- error: cannot find the Armadillo library header files.\033[0m" >&2 ;
+            echo -e "  \x1B[31m         Please set the ARMA_INCLUDE_PATH environment variable.\033[0m" >&2 ;
+            echo -e "  \x1B[31m         Exiting.\033[0m" >&2 ;
+            echo ""
+            exit 1
         fi
-    done
-
-    if [[ $ARMA_INCLUDE_PATH == "" ]]; then
-        echo -e "\x1B[31m  - note: cannot find Armadillo files. Cloning from GitHub\033[0m" >&2 ;
-        echo ""
-
-        mkdir ${WDIR}/arma_tmp
-        git clone --single-branch https://gitlab.com/conradsnicta/armadillo-code.git ${WDIR}/arma_tmp > /dev/null 2>&1
-        mv ${WDIR}/arma_tmp/include/* ${WDIR}/include
-        rm -rf ${WDIR}/arma_tmp
-        ARMA_INCLUDE_PATH="./include"
     fi
+
+    MCMC_CXX_STD="-std=c++11"
+    MCMC_MATLIB_FLAGS="-DMCMC_ENABLE_ARMA_WRAPPERS -DARMA_NO_DEBUG"
+    MCMC_MATLIB_INCLUDE_PATH=$ARMA_INCLUDE_PATH
+elif [[ "${MCMC_LINEAR_ALG_LIB}" == "blaze" ]]; then
+    # MCMC_CXX_STD="-std=c++14"
+    # MCMC_MATLIB_FLAGS="-DMCMC_ENABLE_BLAZE_WRAPPERS"
+    # MCMC_MATLIB_INCLUDE_PATH=$BLAZE_INCLUDE_PATH
+
+    echo -e "  \x1B[31m- error: Blaze not yet supported. Exiting.\033[0m" >&2 ;
+    echo ""
+    exit 1
+elif [[ "${MCMC_LINEAR_ALG_LIB}" == "eigen" ]]; then
+    if [ -z ${EIGEN_INCLUDE_PATH+x} ]; then 
+        
+        EIGEN_INCLUDE_PATH=
+
+        for i in "${MCMC_MATLIB_DIRS[@]}"; do
+            if [ -f "$i"/Eigen ]; then 
+                EIGEN_INCLUDE_PATH="$i"
+                break
+            fi
+        done
+
+        if [[ $EIGEN_INCLUDE_PATH == "" ]]; then
+            echo -e "  \x1B[31m- error: cannot find the Eigen library header files.\033[0m" >&2 ;
+            echo -e "  \x1B[31m         Please set the EIGEN_INCLUDE_PATH environment variable.\033[0m" >&2 ;
+            echo -e "  \x1B[31m         Exiting.\033[0m" >&2 ;
+            echo ""
+            exit 1
+        fi
+    fi
+
+    MCMC_CXX_STD="-std=c++14"
+    MCMC_MATLIB_FLAGS="-DMCMC_ENABLE_EIGEN_WRAPPERS"
+    MCMC_MATLIB_INCLUDE_PATH=$EIGEN_INCLUDE_PATH
+else
+    echo -e "  \x1B[31m- error: unrecognized linear algebra library.\033[0m" >&2 ;
+    echo ""
+    exit 1
 fi
 
 # set build and optimization flags
 
 if [[ "${MCMC_COVERAGE_BUILD}" == "y" ]]; then 
-    MCMC_OPT_FLAGS="-g -O0 --coverage -fno-inline -fno-inline-small-functions -fno-default-inline"
+    if [ "$GCC_COMPILER" -eq "1" ]; then
+        MCMC_OPT_FLAGS="-g -O0 --coverage -fno-inline -fno-inline-small-functions -fno-default-inline"
+    else # clang:
+        MCMC_OPT_FLAGS="-g -O0 --coverage -fno-inline"
+    fi
+elif [[ "${MCMC_DEBUG_BUILD}" == "y" ]]; then
+    MCMC_OPT_FLAGS="-O0 -g"
 else
     if [[ "${MCMC_OPT}" == "" ]]; then
-        MCMC_OPT_FLAGS="-O3 -march=native -ffp-contract=fast -flto -DNDEBUG -DARMA_NO_DEBUG"
+        MCMC_OPT_FLAGS="-O3 -ffp-contract=fast -flto -DNDEBUG"
+
+        if [ "$IS_ARM" -eq "1" ]; then
+            MCMC_OPT_FLAGS="-mcpu=native ${MCMC_OPT_FLAGS}"
+        else
+            # assumes x86
+            MCMC_OPT_FLAGS="-march=native ${MCMC_OPT_FLAGS}"
+        fi
     else
         MCMC_OPT_FLAGS="${MCMC_OPT}"
+    fi
+
+    if [[ "${MCMC_R_BUILD}" != "" ]]; then
+        MCMC_OPT_FLAGS="${MCMC_OPT_FLAGS} -DUSE_RCPP_ARMADILLO"
     fi
 
     if [[ "${MCMC_PARALLEL}" == "y" ]]; then
@@ -100,6 +211,12 @@ else
 fi
 
 MCMC_WARN_FLAGS="-Wall"
+
+# floating-point number type
+
+if [[ "${MCMC_FPN_TYPE}" == "" ]]; then
+    MCMC_FPN_TYPE="double"
+fi
 
 # shared library name and install path
 
@@ -137,10 +254,6 @@ fi
 
 # final optimization checks
 
-if [[ "${MCMC_DEBUG_BUILD}" == "y" ]]; then
-    MCMC_OPT_FLAGS="-O0 -g"
-fi
-
 if [[ "${MCMC_COVERAGE_BUILD}" == "y" ]]; then 
     MCMC_SHLIB_FLAGS="--coverage ${MCMC_SHLIB_FLAGS}"
 else
@@ -148,27 +261,31 @@ else
 fi
 
 #
-
-#
 # final print:
 
+echo "Summary:"
+
 echo "  - OS:            ${OSTYPE}"
+echo "  - Arch:          ${ARCH}"
 echo "  - C++ compiler:  ${CXX}"
 
-if [[ "${MCMC_DEV_BUILD}" == "dev" ]]; then
+if [[ "${MCMC_DEV_BUILD}" == "y" ]]; then
     echo "  - Build version: development"
 elif [[ "${MCMC_COVERAGE_BUILD}" == "y" ]]; then
     echo "  - Build version: coverage"
 elif [[ "${MCMC_DEBUG_BUILD}" == "y" ]]; then
     echo "  - Build version: debug"
+elif [[ "${MCMC_R_BUILD}" != "" ]]; then
+    echo "  - Build version: RcppArmadillo"
 else
     echo "  - Build version: release"
 fi
 
 echo ""
 
-echo "  - ARMA_INCLUDE_PATH set to:"
-echo "    ${ARMA_INCLUDE_PATH}"
+echo "  - MCMC_LINEAR_ALG_LIB set to: ${MCMC_LINEAR_ALG_LIB}"
+echo "  - MCMC_MATLIB_INCLUDE_PATH set to:"
+echo "    ${MCMC_MATLIB_INCLUDE_PATH}"
 echo "  - BLAS and Lapack libraries set to:"
 echo "    ${MCMC_BLAS_LAPACK}"
 
@@ -180,6 +297,7 @@ else
     echo -e "  - OpenMP features: \x1B[31mdisabled\033[0m" >&2 ;
 fi
 
+echo "  - floating-point number type: ${MCMC_FPN_TYPE}"
 echo "  - optimization flags:"
 echo "    ${MCMC_OPT_FLAGS}"
 
@@ -204,13 +322,14 @@ fi
 echo ""
 echo -e "\x1B[32mConfiguration completed. Creating Makefile... \c\033[0m" >&2 ;
 
-sed -e "s|@CC@|${CC}|" \
-    -e "s|@CXX@|${CXX}|" \
-    -e "s|@FC@|${FC}|" \
-    -e "s|@ARMA_INCLUDE_PATH@|${ARMA_INCLUDE_PATH}|" \
+sed -e "s|@CXX@|${CXX}|" \
+    -e "s|@MCMC_CXX_STD@|${MCMC_CXX_STD}|" \
+    -e "s|@MCMC_MATLIB_FLAGS@|${MCMC_MATLIB_FLAGS}|" \
+    -e "s|@MCMC_MATLIB_INCLUDE_PATH@|${MCMC_MATLIB_INCLUDE_PATH}|" \
     -e "s|@MCMC_BLAS_LAPACK@|${MCMC_BLAS_LAPACK}|" \
     -e "s|@MCMC_WARN_FLAGS@|${MCMC_WARN_FLAGS}|" \
     -e "s|@MCMC_OPT_FLAGS@|${MCMC_OPT_FLAGS}|" \
+    -e "s|@MCMC_FPN_TYPE@|${MCMC_FPN_TYPE}|" \
     -e "s|@MCMC_SHLIB_NAME@|${MCMC_SHLIB_NAME}|" \
     -e "s|@MCMC_SHLIB_FLAGS@|${MCMC_SHLIB_FLAGS}|" \
     -e "s|@MCMC_INSTALL_PATH@|${MCMC_INSTALL_PATH}|" \

@@ -16,3 +16,10 @@ include/armadillo*
 *.gcno
 *.gcov
 *.dSYM
+*.out
+
+!docs/Makefile
+docs/build
+docs/xml
+
+header_only_version

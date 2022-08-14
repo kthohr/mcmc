@@ -1,14 +1,14 @@
 
 # core compiling options
 
-CC  = @CC@
 CXX = @CXX@
-FC  = @FC@
 
-CXX_STD = -std=c++11
+CXX_STD = @MCMC_CXX_STD@
 OPT_FLAGS = @MCMC_WARN_FLAGS@ @MCMC_OPT_FLAGS@
+FPN_FLAGS = -DMCMC_FPN_TYPE=@MCMC_FPN_TYPE@
 
-ARMA_INCLUDE_PATH = @ARMA_INCLUDE_PATH@
+MCMC_MATLIB_FLAGS = @MCMC_MATLIB_FLAGS@
+MCMC_MATLIB_INCLUDE_PATH = @MCMC_MATLIB_INCLUDE_PATH@
 
 # install location
 INSTALL_PATH=@MCMC_INSTALL_PATH@
@@ -24,7 +24,7 @@ SHLIB = @MCMC_SHLIB_NAME@
 SHLIB_FLAGS = $(CXX_STD) @MCMC_SHLIB_FLAGS@
 
 # general flags
-CXXFLAGS = $(CXX_STD) $(OPT_FLAGS) -I$(ARMA_INCLUDE_PATH) -I$(MCMC_HEADER_DIR)
+CXXFLAGS = $(CXX_STD) $(OPT_FLAGS) $(FPN_FLAGS) $(MCMC_MATLIB_FLAGS) -I$(MCMC_MATLIB_INCLUDE_PATH) -I$(MCMC_HEADER_DIR)
 LIBS= @MCMC_BLAS_LAPACK@
 
 # core MCMC files
@@ -34,7 +34,8 @@ OBJECTS_MCMC= $(SOURCES_MCMC:.cpp=.o)
 
 all: $(MCMC_DIR)/$(SHLIB) $(OBJECTS_MCMC)
 
-# core MCMC files
+# build
+
 $(MCMC_SRC_DIR)/%.o: $(MCMC_SRC_DIR)/%.cpp
 	$(CXX) $(CXXFLAGS) $< -c -o $@
 
@@ -45,7 +46,8 @@ $(MCMC_DIR)/$(SHLIB): $(OBJECTS_MCMC)
 # cleanup and install
 .PHONY: clean
 clean:
-	@rm -f *.so ./tests/*.test ./tests/*.o $(MCMC_SRC_DIR)/*.o $(MCMC_SRC_DIR)/*.gcov $(MCMC_SRC_DIR)/*.gcno $(MCMC_SRC_DIR)/*.gcda $(MCMC_SRC_DIR)/*.dSYM $(MCMC_SRC_DIR)/*/*.o $(MCMC_SRC_DIR)/*/*.gcov $(MCMC_SRC_DIR)/*/*.gcno $(MCMC_SRC_DIR)/*/*.gcda $(MCMC_SRC_DIR)/*/*.dSYM
+	@rm -f *.so ./tests/*.test ./tests/*.o $(MCMC_SRC_DIR)/*.o $(MCMC_SRC_DIR)/*.gcov $(MCMC_SRC_DIR)/*.gcno $(MCMC_SRC_DIR)/*.gcda $(MCMC_SRC_DIR)/*.dSYM \
+            $(MCMC_SRC_DIR)/*/*.o $(MCMC_SRC_DIR)/*/*.gcov $(MCMC_SRC_DIR)/*/*.gcno $(MCMC_SRC_DIR)/*/*.gcda $(MCMC_SRC_DIR)/*/*.dSYM
 
 .PHONY: vclean
 vclean:
