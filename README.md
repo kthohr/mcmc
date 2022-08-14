@@ -273,13 +273,19 @@ int main()
 
     //
   
-    std::cout << "de mean:\n" << draws_out.colwise().mean() << std::endl;
+    std::cout << "rwmh mean:\n" << draws_out.colwise().mean() << std::endl;
     std::cout << "acceptance rate: " << static_cast<double>(settings.rwmh_settings.n_accept_draws) / settings.rwmh_settings.n_keep_draws << std::endl;
     
     //
  
     return 0;
 }
+```
+
+On x86-based computers, this example can be compiled using:
+
+``` bash
+g++ -Wall -std=c++14 -O3 -mcpu=native -ffp-contract=fast -I$EIGEN_INCLUDE_PATH -I./../../include/ rwmh_normal_mean.cpp -o rwmh_normal_mean.out -L./../.. -lmcmc
 ```
 
 Check the `/examples` directory for additional examples, and https://mcmclib.readthedocs.io/en/latest/ for a detailed description of each algorithm.

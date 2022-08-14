@@ -122,7 +122,7 @@ int main()
 
     //
   
-    std::cout << "de mean:\n" << draws_out.colwise().mean() << std::endl;
+    std::cout << "rwmh mean:\n" << draws_out.colwise().mean() << std::endl;
     std::cout << "acceptance rate: " << static_cast<double>(settings.rwmh_settings.n_accept_draws) / settings.rwmh_settings.n_keep_draws << std::endl;
     
     //
