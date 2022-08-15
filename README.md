@@ -294,7 +294,7 @@ Check the `/examples` directory for additional examples, and https://mcmclib.rea
 
 By combining Eigen with the [Autodiff library](https://autodiff.github.io), MCMCLib provides experimental support for automatic differentiation. 
 
-Example using forward-mode automatic differentiation with BFGS for the Sphere function:
+The example below uses forward-mode automatic differentiation to compute the gradient of the Gaussian likelihood function, and the HMC algorithm to sample from the posterior distribution of the mean and variance parameters.
 
 ``` cpp
 #define MCMC_ENABLE_EIGEN_WRAPPERS
