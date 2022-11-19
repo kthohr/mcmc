@@ -16,17 +16,17 @@ Adaptive Equi-Energy Sampler
 Algorithm Description
 ---------------------
 
-The Adaptive Equi-Energy Sampler (AEES) algorithm is a Markov Chain Monte Carlo method designed for multi modal target distributions. 
-See Kou, Zhou, Wong (2006) for the standard equi-energy sampler, and Schreck, Fort, Moulines (2013) for the adaptive version presented here.
+The Adaptive Equi-Energy Sampler (AEES) algorithm is a Markov Chain Monte Carlo method designed to generate samples from multi-modal target distributions. 
+See Kou, Zhou, Wong (2006) for details of the standard equi-energy sampler, and Schreck, Fort, Moulines (2013) for the adaptive version (presented here).
 
-Let :math:`\theta_k^{(i)}` denote a :math:`d`-dimensional vector of stored values at stage :math:`i` of the algorithm, drawn from target distribution :math:`\pi_k`, where :math:`k \in \{ 0, 1, \ldots, K \}` and :math:`K` denotes the number of energy rings. 
-We will use the following notation to define a tempered target distribution:
+Let :math:`\theta_k^{(i)}` denote a :math:`d`-dimensional vector of stored values at stage :math:`i` of the algorithm, drawn from target distribution :math:`\pi_k`, 
+where :math:`k \in \{ 0, 1, \ldots, K \}` and :math:`K` denotes the number of energy rings. We will use the following notation to define a tempered target distribution:
 
 .. math::
 
     \pi_k (\theta) \propto \exp( - H(\theta | X) / T_k)
 
-where :math:`T_0 = 1`` and :math:`H` is the energy function (the negative of the log-posterior kernel function). :math:`\pi` without a subscript will refer to the intended target distribution: :math:`\pi_0`.
+where :math:`T_k` denotes the temperature (with :math:`T_0 = 1`) and :math:`H` denotes the energy function (i.e., the negative of the log-posterior kernel function).
 
 The AEES algorithm proceeds as follows.
 

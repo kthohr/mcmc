@@ -82,8 +82,8 @@ Contents
    api/de
    api/hmc
    api/mala
-   api/rmhmc
    api/rwmh
+   api/rmhmc
 
 .. toctree::
    :caption: Appendix
