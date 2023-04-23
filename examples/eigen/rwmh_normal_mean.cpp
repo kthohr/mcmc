@@ -1,6 +1,6 @@
 /*################################################################################
   ##
-  ##   Copyright (C) 2011-2022 Keith O'Hara
+  ##   Copyright (C) 2011-2023 Keith O'Hara
   ##
   ##   This file is part of the MCMC C++ library.
   ##
@@ -67,7 +67,7 @@ double ll_dens(const Eigen::VectorXd& vals_inp, void* ll_data)
  
     return ret;
 }
- 
+
 double log_pr_dens(const Eigen::VectorXd& vals_inp, void* ll_data)
 {
     const double pi = 3.14159265358979;

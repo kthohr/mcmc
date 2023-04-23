@@ -29,7 +29,7 @@ html_static_path = ['_static']
 source_suffix = '.rst'
 master_doc = 'index'
 project = 'MCMCLib'
-copyright = '2011-2022 Keith O\'Hara'
+copyright = '2011-2023 Keith O\'Hara'
 author = 'Keith O\'Hara'
 
 exclude_patterns = []

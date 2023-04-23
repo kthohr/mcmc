@@ -1,6 +1,6 @@
 /*################################################################################
   ##
-  ##   Copyright (C) 2011-2022 Keith O'Hara
+  ##   Copyright (C) 2011-2023 Keith O'Hara
   ##
   ##   This file is part of the MCMC C++ library.
   ##
@@ -95,6 +95,7 @@ mcmc::internal::hmc_impl(
     };
 
     // momentum update function
+    
     std::function<ColVec_t (const ColVec_t& pos_inp, const ColVec_t& mntm_inp, void* target_data, const fp_t step_size, Mat_t* jacob_matrix_out)> mntm_update_fn \
     = [target_log_kernel, vals_bound, bounds_type, lower_bounds, upper_bounds] (const ColVec_t& pos_inp, const ColVec_t& mntm_inp, void* target_data, const fp_t step_size, Mat_t* jacob_matrix_out) \
     -> ColVec_t 
@@ -160,10 +161,10 @@ mcmc::internal::hmc_impl(
 
         new_draw = prev_draw;
 
-        for (size_t k = 0; k < n_leap_steps; ++k){
+        for (size_t k = 0; k < n_leap_steps; ++k) {
             // begin leap-frog steps
 
-            new_mntm = mntm_update_fn(new_draw,new_mntm,target_data,step_size,nullptr); // half-step
+            new_mntm = mntm_update_fn(new_draw, new_mntm, target_data, step_size, nullptr); // first half-step
 
             //
 
@@ -171,7 +172,7 @@ mcmc::internal::hmc_impl(
 
             //
 
-            new_mntm = mntm_update_fn(new_draw,new_mntm,target_data,step_size,nullptr); // half-step
+            new_mntm = mntm_update_fn(new_draw, new_mntm, target_data, step_size, nullptr); // second half-step
         }
 
         prop_U = - box_log_kernel(new_draw, nullptr, target_data);
