@@ -77,6 +77,27 @@ struct hmc_settings_t
     size_t n_accept_draws; // will be returned by the function
 };
 
+// NUTS
+
+struct nuts_settings_t
+{
+    size_t n_burnin_draws = 1E03;
+    size_t n_keep_draws = 1E03;
+
+    int omp_n_threads = -1; // numbers of threads to use
+
+    size_t n_adapt_draws = 1E03;
+    fp_t target_accept_rate = 0.55;
+
+    fp_t step_size = 1.0; // \bar{\epsilon}_0
+    fp_t gamma_val = 0.05;
+    fp_t t0_val = 10;
+    fp_t kappa_val = 0.75;
+    Mat_t precond_mat;
+
+    size_t n_accept_draws; // will be returned by the function
+};
+
 // RM-HMC
 
 struct rmhmc_settings_t
@@ -146,6 +167,9 @@ struct algo_settings_t
 
     // HMC
     hmc_settings_t hmc_settings;
+
+    // NUTS
+    nuts_settings_t nuts_settings;
 
     // RM-HMC
     rmhmc_settings_t rmhmc_settings;
