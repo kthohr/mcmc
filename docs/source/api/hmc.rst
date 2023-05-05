@@ -114,7 +114,7 @@ Additional settings:
 
 - ``Mat_t hmc_settings.precond_mat``: preconditioning matrix for the leapfrog step.
 
-  - Default value: diagonal matrix.
+  - Default value: a diagonal matrix.
 
 ----
 

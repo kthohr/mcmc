@@ -32,11 +32,11 @@
 #endif
 
 #ifndef MCMC_VERSION_MINOR
-    #define MCMC_VERSION_MINOR 0
+    #define MCMC_VERSION_MINOR 1
 #endif
 
 #ifndef MCMC_VERSION_PATCH
-    #define MCMC_VERSION_PATCH 99
+    #define MCMC_VERSION_PATCH 0
 #endif
 
 //

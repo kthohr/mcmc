@@ -19,14 +19,14 @@
   ################################################################################*/
  
 /*
- * No U-Turn Sampler (NUTS) (with Dual Averaging)
+ * No-U-Turn Sampler (NUTS) (with Dual Averaging)
  */
 
 #ifndef _mcmc_nuts_HPP
 #define _mcmc_nuts_HPP
 
 /**
- * @brief The No U-Turn Sampler (NUTS) MCMC Algorithm
+ * @brief The No-U-Turn Sampler (NUTS) MCMC Algorithm
  *
  * @param initial_vals a column vector of initial values.
  * @param target_log_kernel the log posterior kernel function of the target distribution, taking three arguments:
@@ -48,7 +48,7 @@ nuts(
 );
 
 /**
- * @brief The No U-Turn Sampler (NUTS) MCMC Algorithm
+ * @brief The No-U-Turn Sampler (NUTS) MCMC Algorithm
  *
  * @param initial_vals a column vector of initial values.
  * @param target_log_kernel the log posterior kernel function of the target distribution, taking three arguments:

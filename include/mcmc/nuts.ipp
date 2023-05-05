@@ -19,7 +19,7 @@
   ################################################################################*/
  
 /*
- * No U-Turn Sampler (NUTS) (with Dual Averaging)
+ * No-U-Turn Sampler (NUTS) (with Dual Averaging)
  */
 
 #ifndef _mcmc_nuts_IPP
@@ -85,7 +85,7 @@ nuts_find_initial_step_size(
 
         //
 
-        a_val = 2 * ( - (prop_U + prop_K) + (prev_U + prev_K) > std::log(0.5) ) - 1; // not obvious from the paper, but I think we should update a...
+        a_val = 2 * ( (- (prop_U + prop_K) + (prev_U + prev_K)) > std::log(0.5)) - 1; // not obvious from the paper, but I think we should update a...
         check_cond = (- (prop_U + prop_K) + (prev_U + prev_K)) > - std::log(2);
     }
 
@@ -99,7 +99,7 @@ void
 nuts_build_tree(
     const int direction_val,         // v
     const fp_t step_size,            // epsilon
-    const fp_t rand_val,             // u
+    const fp_t log_rand_val,             // u
     const fp_t prev_U,               // - L(\theta^0)
     const fp_t prev_K,               // 0.5 * [r^0]^T M^{-1} [r^0]
     const ColVec_t& draw_vec,        // \theta
@@ -107,7 +107,7 @@ nuts_build_tree(
     const Mat_t& inv_precond_matrix, // not in the original paper
     std::function<fp_t (const ColVec_t& vals_inp, ColVec_t* grad_out, void* target_data)> box_log_kernel_fn, 
     std::function<void (const fp_t step_size, const size_t n_leap_steps, ColVec_t& new_draw, ColVec_t& new_mntm, void* target_data)> leap_frog_fn, 
-    const size_t iter_ind,           // j
+    const size_t tree_depth,         // j
     ColVec_t& new_draw,              // \theta'
     ColVec_t& new_draw_pos,          // \theta^+
     ColVec_t& new_draw_neg,          // \theta^-
@@ -123,7 +123,7 @@ nuts_build_tree(
 {
     const fp_t max_tuning_par = 1000; // from the paper: We recommend setting \delta_max to a large value like 1000 so that it does not interfere with the algorithm so long as the simulation is even moderately accurate.
 
-    if (iter_ind == size_t(0)) {
+    if (tree_depth == size_t(0)) {
         new_draw = draw_vec;
         ColVec_t new_mntm = mntm_vec;
 
@@ -141,9 +141,9 @@ nuts_build_tree(
 
         //
 
-        fp_t log_rand_val = std::log(rand_val);
+        // fp_t log_log_rand_val = std::log(rand_val);
 
-        n_val = (log_rand_val < - prop_U - prop_K);
+        n_val = (log_rand_val <= - prop_U - prop_K);
         s_val = (log_rand_val < max_tuning_par - prop_U - prop_K);
 
         //
@@ -164,9 +164,9 @@ nuts_build_tree(
         ColVec_t new_draw_p;
 
         nuts_build_tree(
-            direction_val, step_size, rand_val, prev_U, prev_K,
+            direction_val, step_size, log_rand_val, prev_U, prev_K,
             draw_vec, mntm_vec, inv_precond_matrix,
-            box_log_kernel_fn, leap_frog_fn, iter_ind - 1,
+            box_log_kernel_fn, leap_frog_fn, tree_depth - 1,
             new_draw_p, new_draw_pos, new_draw_neg, new_mntm_pos, new_mntm_neg,
             n_p_val, s_p_val, alpha_p_val, n_alpha_p_val, rand_engine, target_data);
         
@@ -189,9 +189,9 @@ nuts_build_tree(
                 ColVec_t mntm_neg = new_mntm_neg;
 
                 nuts_build_tree(
-                    direction_val, step_size, rand_val, prev_U, prev_K,
+                    direction_val, step_size, log_rand_val, prev_U, prev_K,
                     draw_neg, mntm_neg, inv_precond_matrix,
-                    box_log_kernel_fn, leap_frog_fn, iter_ind - 1,
+                    box_log_kernel_fn, leap_frog_fn, tree_depth - 1,
                     new_draw_pp, new_draw_neg, dummy_draw, new_mntm_neg, dummy_mntm,
                     n_pp_val, s_pp_val, alpha_pp_val, n_alpha_pp_val, rand_engine, target_data);
             } else {
@@ -201,9 +201,9 @@ nuts_build_tree(
                 ColVec_t mntm_pos = new_mntm_pos;
 
                 nuts_build_tree(
-                    direction_val, step_size, rand_val, prev_U, prev_K,
+                    direction_val, step_size, log_rand_val, prev_U, prev_K,
                     draw_pos, mntm_pos, inv_precond_matrix,
-                    box_log_kernel_fn, leap_frog_fn, iter_ind - 1,
+                    box_log_kernel_fn, leap_frog_fn, tree_depth - 1,
                     new_draw_pp, dummy_draw, new_draw_pos, dummy_mntm, new_mntm_pos,
                     n_pp_val, s_pp_val, alpha_pp_val, n_alpha_pp_val, rand_engine, target_data);
             }

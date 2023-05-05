@@ -89,6 +89,8 @@ struct nuts_settings_t
     size_t n_adapt_draws = 1E03;
     fp_t target_accept_rate = 0.55;
 
+    size_t max_tree_depth = size_t(10);
+
     fp_t step_size = 1.0; // \bar{\epsilon}_0
     fp_t gamma_val = 0.05;
     fp_t t0_val = 10;

@@ -32,12 +32,13 @@ Features:
 
 A list of currently available algorithms includes:
 
-* Random Walk Metropolis-Hastings (RWMH)
-* Hamiltonian Monte Carlo (HMC)
-* Riemannian Manifold Hamiltonian Monte Carlo (RM-HMC)
-* Metropolis-adjusted Langevin algorithm (MALA)
 * Adaptive Equi-Energy Sampler (AEES)
 * Differential Evolution (DE-MCMC)
+* Hamiltonian Monte Carlo (HMC)
+* Metropolis-adjusted Langevin algorithm (MALA)
+* No-U-Turn Sampler (NUTS)
+* Random Walk Metropolis-Hastings (RWMH)
+* Riemannian Manifold Hamiltonian Monte Carlo (RM-HMC)
 
 ## Documentation
 

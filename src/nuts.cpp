@@ -19,7 +19,7 @@
   ################################################################################*/
  
 /*
- * No U-Turn Sampler (NUTS) (with Dual Averaging)
+ * No-U-Turn Sampler (NUTS) (with Dual Averaging)
  */
 
 #include "mcmc.hpp"
@@ -53,6 +53,8 @@ mcmc::internal::nuts_impl(
 
     const size_t n_adapt_draws = (settings.nuts_settings.n_adapt_draws <= n_total_draws) ? settings.nuts_settings.n_adapt_draws : n_total_draws;
     const fp_t target_accept_rate = settings.nuts_settings.target_accept_rate;
+
+    const size_t max_tree_depth = settings.nuts_settings.max_tree_depth;
 
     fp_t epsilon_bar     = settings.nuts_settings.step_size; // \bar{\epsilon}_0
     const fp_t gamma_val = settings.nuts_settings.gamma_val;
@@ -172,8 +174,6 @@ mcmc::internal::nuts_impl(
     const fp_t mu_val = std::log(10 * step_size);
     fp_t h_val = 0;
 
-    std::cout << "step_size = " << step_size << std::endl;
-
     //
 
     BMO_MATOPS_SET_SIZE(draws_out, n_keep_draws, n_vals);
@@ -182,7 +182,7 @@ mcmc::internal::nuts_impl(
     fp_t prop_U = prev_U;
 
     fp_t prev_K;
-    fp_t rand_val;
+    fp_t log_rand_val;
     
     ColVec_t prev_draw = first_draw;
     ColVec_t new_draw  = first_draw;
@@ -205,7 +205,7 @@ mcmc::internal::nuts_impl(
 
         prev_K = BMO_MATOPS_DOT_PROD(mntm_vec, inv_precond_matrix * mntm_vec) / fp_t(2);
 
-        rand_val = bmo::stats::runif<fp_t>(rand_engine) * std::exp( - prev_U - prev_K );
+        log_rand_val = std::log(bmo::stats::runif<fp_t>(rand_engine)) - prev_U - prev_K ;
 
         //
 
@@ -216,7 +216,7 @@ mcmc::internal::nuts_impl(
         mntm_pos = mntm_vec;
         mntm_neg = mntm_vec;
 
-        size_t tree_iter_ind = 0;
+        size_t tree_depth = 0;
         size_t n_val = 1;
         size_t s_val = 1;
 
@@ -226,7 +226,7 @@ mcmc::internal::nuts_impl(
 
         //
 
-        while (s_val == size_t(1)) {
+        while (s_val == size_t(1) && tree_depth < max_tree_depth) {
             size_t n_p_val;
             size_t s_p_val;
 
@@ -241,18 +241,18 @@ mcmc::internal::nuts_impl(
                 ColVec_t dummy_mntm = mntm_pos;
 
                 nuts_build_tree(
-                    direction_val, step_size, rand_val, prev_U, prev_K,
+                    direction_val, step_size, log_rand_val, prev_U, prev_K,
                     prev_draw, mntm_vec, inv_precond_matrix,
-                    box_log_kernel_fn, leap_frog_fn, tree_iter_ind,
+                    box_log_kernel_fn, leap_frog_fn, tree_depth,
                     new_draw, dummy_draw, draw_neg, dummy_mntm, mntm_neg,
                     n_p_val, s_p_val, alpha_val, n_alpha_val, rand_engine, target_data);
             } else {
                 ColVec_t dummy_draw = draw_neg;
                 ColVec_t dummy_mntm = mntm_neg;
 
-                nuts_build_tree(direction_val, step_size, rand_val, prev_U, prev_K,
+                nuts_build_tree(direction_val, step_size, log_rand_val, prev_U, prev_K,
                     prev_draw, mntm_vec, inv_precond_matrix,
-                    box_log_kernel_fn, leap_frog_fn, tree_iter_ind,
+                    box_log_kernel_fn, leap_frog_fn, tree_depth,
                     new_draw, draw_pos, dummy_draw, mntm_pos, dummy_mntm,
                     n_p_val, s_p_val, alpha_val, n_alpha_val, rand_engine, target_data);
             }
@@ -283,7 +283,7 @@ mcmc::internal::nuts_impl(
             //
 
             n_val += n_p_val;
-            tree_iter_ind += 1;
+            tree_depth += 1;
 
             int check_val_1 = BMO_MATOPS_DOT_PROD(draw_pos - draw_neg, mntm_neg) >= fp_t(0);
             int check_val_2 = BMO_MATOPS_DOT_PROD(draw_pos - draw_neg, mntm_pos) >= fp_t(0);
@@ -299,8 +299,6 @@ mcmc::internal::nuts_impl(
             step_size = std::exp(mu_val - h_val * std::sqrt(draw_ind + 1) / gamma_val);
 
             epsilon_bar *= std::exp( std::pow(draw_ind + 1, - kappa_val) * (std::log(step_size) - std::log(epsilon_bar)) );
-
-            std::cout << "new step_size = " << step_size << std::endl;
         } else {
             step_size = epsilon_bar;
         }
@@ -311,8 +309,6 @@ mcmc::internal::nuts_impl(
             draws_out.row(draw_ind - n_burnin_draws) = BMO_MATOPS_TRANSPOSE(prev_draw);
             n_accept += good_round;
         }
-
-        std::cout << "draw_ind = " << draw_ind << std::endl;
     }
 
     success = true;
