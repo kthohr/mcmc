@@ -46,20 +46,20 @@ Installation
 
 The library can be installed on Unix-alike systems via the standard ``./configure && make`` method.
 
-See the installation page for :ref:`detailed instructions <installation>`.
+See the installation page for :ref:`detailed instructions<installation>`.
 
 Algorithms
 ----------
 
 A list of currently available algorithms includes:
 
-* Adaptive Equi-Energy Sampler (AEES)
-* Differential Evolution (DE-MCMC)
-* Hamiltonian Monte Carlo (HMC)
-* Metropolis-adjusted Langevin algorithm (MALA)
-* No-U-Turn Sampler (NUTS)
-* Random Walk Metropolis-Hastings (RWMH)
-* Riemannian Manifold Hamiltonian Monte Carlo (RM-HMC)
+* :ref:`Adaptive Equi-Energy Sampler (AEES)<adaptive-equi-energy-sampler>`
+* :ref:`Differential Evolution (DE-MCMC)<differential-evolution>`
+* :ref:`Hamiltonian Monte Carlo (HMC)<hamiltonian-monte-carlo>`
+* :ref:`Metropolis-adjusted Langevin algorithm (MALA)<metropolis-adjusted-langevin-algorithm>`
+* :ref:`No-U-Turn Sampler (NUTS)<no-u-turn-sampler>`
+* :ref:`Random Walk Metropolis-Hastings (RWMH)<random-walk-metropolis-hastings>`
+* :ref:`Riemannian Manifold Hamiltonian Monte Carlo (RM-HMC)<riemannian-manifold-hmc>`
 
 ----
 

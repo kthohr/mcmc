@@ -4,6 +4,8 @@
 
    The full license is in the file LICENSE, distributed with this software.
 
+.. _metropolis-adjusted-langevin-algorithm:
+
 Metropolis-adjusted Langevin Algorithm
 ======================================
 

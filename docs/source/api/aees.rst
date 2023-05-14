@@ -4,6 +4,8 @@
 
    The full license is in the file LICENSE, distributed with this software.
 
+.. _adaptive-equi-energy-sampler:
+
 Adaptive Equi-Energy Sampler
 ============================
 
