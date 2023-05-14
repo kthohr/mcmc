@@ -192,8 +192,6 @@ mcmc::internal::nuts_impl(
     ColVec_t mntm_pos  = mntm_vec;
     ColVec_t mntm_neg  = mntm_vec;
 
-    // ColVec_t mntm_vec(n_vals);
-
     // 
 
     size_t n_accept = 0;
@@ -220,8 +218,8 @@ mcmc::internal::nuts_impl(
         size_t n_val = 1;
         size_t s_val = 1;
 
-        fp_t alpha_val;
-        size_t n_alpha_val;
+        fp_t alpha_val = 0;
+        size_t n_alpha_val = 0;
         int good_round = 0;
 
         //
