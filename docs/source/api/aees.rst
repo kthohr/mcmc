@@ -52,7 +52,7 @@ The AEES algorithm proceeds as follows.
 
       .. math::
 
-          \theta_k^{(i+1)} = \begin{cases} \theta_k^{(*)} & \text{ if } Z < \alpha \\ \theta_k^{(i)} & \text{ else } \end{cases}
+          \theta_k^{(i+1)} = \begin{cases} \theta_k^{(*)} & \text{ with probability } \alpha \\ \theta_k^{(i)} & \text{ else } \end{cases}
 
 
 The algorithm stops when the number of draws reaches ``n_initial_draws`` + ``n_burnin_draws`` + ``n_keep_draws``, and returns the final ``n_keep_draws`` number of draws.

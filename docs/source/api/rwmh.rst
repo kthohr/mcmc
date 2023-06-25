@@ -40,9 +40,7 @@ Let :math:`\theta^{(i)}` denote a :math:`d`-dimensional vector of stored values 
 
   .. math::
 
-    \theta^{(i+1)} = \begin{cases} \theta^{(*)} & \text{ if } Z < \alpha \\ \theta^{(i)} & \text{ else } \end{cases}
-
-  where :math:`Z \sim U(0,1)`.
+    \theta^{(i+1)} = \begin{cases} \theta^{(*)} & \text{ with probability } \alpha \\ \theta^{(i)} & \text{ else } \end{cases}
 
 The algorithm stops when the number of draws reaches ``n_burnin_draws`` + ``n_keep_draws``, and returns the final ``n_keep_draws`` number of draws.
 
