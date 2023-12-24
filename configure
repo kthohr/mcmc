@@ -91,6 +91,10 @@ if [[ "${MCMC_GEN_NEW_HEADERS}" == "y" ]]; then
 
             #
 
+            if [[ "${file_}" == "mcmc_algos" ]]; then
+                continue
+            fi
+
             if [ "$IS_DARWIN" -eq "1" ]; then # syntax for inplace replacement on macOS is a bit different
                 sed -i '' -e "s|#endif|//\n|" $file_.hpp
             else
