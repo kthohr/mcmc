@@ -5,5 +5,8 @@ build:
   tools:
     python: "mambaforge-22.9"
 
+formats:
+  - pdf
+
 conda:
   environment: docs/environment.yml
