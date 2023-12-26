@@ -1,7 +1,9 @@
-requirements_file: .readthedocs.requirements.txt
+version: 2
+
+build:
+  os: "ubuntu-22.04"
+  tools:
+    python: "mambaforge-22.9"
 
 conda:
-  file: docs/environment.yml
-
-python:
-  version: "3.8"
+  environment: docs/environment.yml
