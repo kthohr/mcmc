@@ -163,11 +163,7 @@ To use MCMCLib with an R package, first generate a header-only version of the li
 #include "mcmc.hpp"
 ```
 
-* For RcppEigen:
-```cpp
-#define MCMC_USE_RCPP_EIGEN
-#include "mcmc.hpp"
-```
+At this time, builds using `RcppEigen` are not supported as MCMCLib requires a version of Eigen >= v3.4.0.
 
 ## Example
 

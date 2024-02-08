@@ -47,18 +47,17 @@ The following options should be declared **before** including the MCMCLib header
     #define MCMC_ENABLE_EIGEN_WRAPPERS
     #include "mcmc.hpp"
 
-- To use MCMCLib with RcppArmadillo or RcppEigen:
+- To use MCMCLib with RcppArmadillo:
 
   .. code:: cpp
 
     #define MCMC_USE_RCPP_ARMADILLO
-    #define MCMC_USE_RCPP_EIGEN
 
   Example:
 
   .. code:: cpp
 
-    #define MCMC_USE_RCPP_EIGEN
+    #define MCMC_USE_RCPP_ARMADILLO
     #include "mcmc.hpp"
 
 
